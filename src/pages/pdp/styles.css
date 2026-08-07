@@ -380,15 +380,27 @@
 .ltd-head { display: flex; align-items: stretch; background: #edeefd; }
 .ltd--live .ltd-head { background: var(--white); }
 
-/* Fixed 163px because the ribbon behind it is a fixed-width slanted shape. */
+/* The ribbon takes every pixel the countdown doesn't need, so it grows with the
+   card instead of staying pinned to the 163px it was drawn at. Its artwork has
+   preserveAspectRatio="none", so it stretches cleanly. */
 .ltd-head-left {
   position: relative;
-  flex: 0 0 163px;
-  display: flex; align-items: center; gap: 6px;
-  height: 30px; padding: 8px 12px;
+  /* 163px is the floor at which the label still fits inside the solid part
+     (127px of content / 0.782). Below it the text would run into the slant, so
+     the countdown side gives up its padding first. */
+  flex: 1 1 auto; min-width: 163px;
+  height: 30px;
 }
-.ltd-ribbon { position: absolute; inset: 0; width: 163px; height: 30px; }
-.ltd-bolt { position: relative; flex: 0 0 auto; }
+.ltd-ribbon { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* 78.2% is where the ribbon's bottom edge ends and the tail starts slanting
+   away. Keeping the inner box to that share means the label stays centred on
+   the solid purple at any card width, instead of drifting into the diagonal. */
+.ltd-head-left-inner {
+  position: relative;
+  width: 78.2%; height: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.ltd-bolt { flex: 0 0 auto; }
 .ltd-label {
   position: relative;
   font-size: 12px; font-weight: 700; line-height: normal;
@@ -396,9 +408,12 @@
   white-space: nowrap;
 }
 
+/* Sized to its content so whatever is left over goes to the ribbon, but allowed
+   to compress on narrow phones — the design has no slack below a 327px card. */
 .ltd-head-right {
-  flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px;
-  padding: 0 12px;
+  flex: 0 1 auto; min-width: 0;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  padding: 0 8px;
 }
 .ltd-head-icon { flex: 0 0 auto; }
 .ltd-timer {

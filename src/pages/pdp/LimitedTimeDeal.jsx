@@ -108,8 +108,12 @@ export default function LimitedTimeDeal({ deal, price, was, off, dh: Dh }) {
       <div className="ltd-head">
         <div className="ltd-head-left">
           <img className="ltd-ribbon" src="/pdp/icons/deal-ribbon.svg" alt="" width="163" height="30" />
-          <img className="ltd-bolt" src="/pdp/icons/deal-bolt.svg" alt="" width="14" height="14" />
-          <span className="ltd-label">Limited time deal</span>
+          {/* inner box spans only the ribbon's solid part, so centring here
+              centres against the purple rather than the slanted tail */}
+          <span className="ltd-head-left-inner">
+            <img className="ltd-bolt" src="/pdp/icons/deal-bolt.svg" alt="" width="14" height="14" />
+            <span className="ltd-label">Limited time deal</span>
+          </span>
         </div>
         <div className="ltd-head-right">
           {/* a padlock while the deal is still shut, a timelapse once it's running */}
