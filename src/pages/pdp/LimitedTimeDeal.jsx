@@ -223,16 +223,16 @@ export default function LimitedTimeDeal({ deal, price, upcomingWas, liveWas, off
         </div>
         {!live && (
           <button
-            className="ltd-notify"
+            className={`ltd-notify${notified ? ' ltd-notify--notified' : ''}`}
             type="button"
             data-testid="widget-notify"
             disabled={notified}
             onClick={onNotify}
           >
             <span className="ltd-ico ltd-ico--20">
-              <img src="/pdp/icons/deal-bell.svg" alt="" />
+              <img src={notified ? '/pdp/icons/deal-bell-notified.svg' : '/pdp/icons/deal-bell.svg'} alt="" />
             </span>
-            Notify me
+            {notified ? 'Notified' : 'Notify me'}
           </button>
         )}
       </div>

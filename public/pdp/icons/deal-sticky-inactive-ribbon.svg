@@ -1,14 +1,14 @@
-<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="243" height="36" viewBox="0 0 243 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="243" height="32" viewBox="0 0 243 32" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g id="Vector">
-<path d="M59.9913 0H0.0193087H0L0.0200216 35.9413L190.271 35.9413C196.433 35.9413 202.743 36.4219 208.664 34.6322C216.88 32.1464 220.555 24.0122 225.236 17.6819C227.901 14.0858 230.362 10.3572 233.415 6.9932C234.803 5.46862 236.246 3.92746 237.911 2.66802C239.965 1.12687 241.594 0.182287 243 0H59.9913Z" fill="url(#paint0_linear_0_45)"/>
-<path d="M59.9913 0H0.0193087H0L0.0200216 35.9413L190.271 35.9413C196.433 35.9413 202.743 36.4219 208.664 34.6322C216.88 32.1464 220.555 24.0122 225.236 17.6819C227.901 14.0858 230.362 10.3572 233.415 6.9932C234.803 5.46862 236.246 3.92746 237.911 2.66802C239.965 1.12687 241.594 0.182287 243 0H59.9913Z" fill="url(#paint1_linear_0_45)"/>
+<path d="M59.9913 0H0.0193087H0L0.0200216 31.9479L190.271 31.9479C196.433 31.9479 202.743 32.375 208.664 30.7842C216.88 28.5746 220.555 21.3442 225.236 15.7172C227.901 12.5207 230.362 9.20642 233.415 6.21618C234.803 4.86099 236.246 3.49108 237.911 2.37157C239.965 1.00166 241.594 0.162033 243 0H59.9913Z" fill="url(#paint0_linear_0_17)"/>
+<path d="M59.9913 0H0.0193087H0L0.0200216 31.9479L190.271 31.9479C196.433 31.9479 202.743 32.375 208.664 30.7842C216.88 28.5746 220.555 21.3442 225.236 15.7172C227.901 12.5207 230.362 9.20642 233.415 6.21618C234.803 4.86099 236.246 3.49108 237.911 2.37157C239.965 1.00166 241.594 0.162033 243 0H59.9913Z" fill="url(#paint1_linear_0_17)"/>
 </g>
 <defs>
-<linearGradient id="paint0_linear_0_45" x1="0" y1="18" x2="242.999" y2="18" gradientUnits="userSpaceOnUse">
+<linearGradient id="paint0_linear_0_17" x1="0" y1="16" x2="242.999" y2="16" gradientUnits="userSpaceOnUse">
 <stop stop-color="#0F8857"/>
 <stop offset="1" stop-color="#0B623F"/>
 </linearGradient>
-<linearGradient id="paint1_linear_0_45" x1="0" y1="18" x2="242.999" y2="18" gradientUnits="userSpaceOnUse">
+<linearGradient id="paint1_linear_0_17" x1="0" y1="16" x2="242.999" y2="16" gradientUnits="userSpaceOnUse">
 <stop stop-color="#757ADB"/>
 <stop offset="1" stop-color="#4F52D4"/>
 </linearGradient>

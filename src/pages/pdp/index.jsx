@@ -194,16 +194,21 @@ function BottomDeal({ deal, notified, onNotify }) {
           </span>
         ) : (
           <button
-            className="bottom-deal-notify"
+            className={`bottom-deal-notify${notified ? ' bottom-deal-notify--notified' : ''}`}
             type="button"
             data-testid="bottom-strip-notify"
             disabled={notified}
             onClick={onNotify}
           >
-            <span className="bottom-deal-icon">
-              <img src="/pdp/icons/deal-sticky-bell.svg" alt="" />
+            <span className="bottom-deal-icon bottom-deal-icon--18">
+              <img
+                src={notified
+                  ? '/pdp/icons/deal-sticky-notified.svg'
+                  : '/pdp/icons/deal-sticky-bell.svg'}
+                alt=""
+              />
             </span>
-            Notify me
+            {notified ? 'Notified' : 'Notify me'}
           </button>
         )}
       </div>
@@ -221,14 +226,12 @@ function BottomNav({ deal, showDeal, notified, onNotify }) {
         {showDeal && deal.state !== 'ended' && (
           <motion.div
             className="bottom-deal-reveal"
-            initial={reduceMotion ? false : { height: 0, opacity: 0, y: 36 }}
-            animate={{ height: 36, opacity: 1, y: 0 }}
+            initial={reduceMotion ? false : { height: 0 }}
+            animate={{ height: 32 }}
             exit={reduceMotion
-              ? { height: 0, opacity: 0 }
+              ? { height: 0 }
               : {
                   height: 0,
-                  opacity: 0,
-                  y: 36,
                   transition: { duration: 0.36, ease: [0.4, 0, 1, 1] },
                 }}
             transition={reduceMotion
