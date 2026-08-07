@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion'
-import LimitedTimeDeal, { useLimitedTimeDeal } from './LimitedTimeDeal'
+import LimitedTimeDeal, { DealSwitcher, useLimitedTimeDeal } from './LimitedTimeDeal'
 import './styles.css'
 
 // Product page, ported from ashbun/noon-pdp-prototype and trimmed to the PDP
@@ -33,6 +33,10 @@ function PDP() {
   const { scrollY } = useScroll({ container: scrollRef })
   const imgScale = useTransform(scrollY, [0, 320], [1, 0.7], { clamp: true })
   const imgOpacity = useTransform(scrollY, [0, 260, 400], [1, 1, 0.35], { clamp: true })
+  // The state switcher is pinned, so it would sit on top of the sections once
+  // they scroll up under it — fade it out with the gallery instead.
+  const switcherOpacity = useTransform(scrollY, [60, 200], [1, 0], { clamp: true })
+  const switcherEvents = useTransform(scrollY, (y) => (y > 190 ? 'none' : 'auto'))
 
   return (
     <div className="pdp">
@@ -51,6 +55,12 @@ function PDP() {
           <Reviews />
         </div>
       </div>
+      <motion.div
+        className="deal-switch-dock"
+        style={{ opacity: switcherOpacity, pointerEvents: switcherEvents }}
+      >
+        <DealSwitcher />
+      </motion.div>
       <BottomNav />
     </div>
   )

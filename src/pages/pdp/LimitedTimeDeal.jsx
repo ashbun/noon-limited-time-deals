@@ -13,8 +13,8 @@ import { useSearchParams } from 'react-router-dom'
 //              price row (matches the Figma, where that row is toggled off).
 // Past `endsAt` the deal is 'ended' and the caller drops the banner entirely.
 //
-// For design review you can force a state with ?deal=upcoming or ?deal=live —
-// otherwise it picks the scenario below and genuinely ticks.
+// Which one you see is held in the URL (?deal=live | ?deal=upcoming) and driven
+// by the floating DealSwitcher, so a given state is also shareable as a link.
 
 const SECOND = 1000
 const MINUTE = 60 * SECOND
@@ -36,22 +36,60 @@ function useNow() {
   return now
 }
 
-export function useLimitedTimeDeal() {
-  const [params] = useSearchParams()
+function useScenario() {
+  const [params, setParams] = useSearchParams()
   const scenario = params.get('deal') === 'upcoming' ? 'upcoming' : 'live'
+  const setScenario = (next) => {
+    const q = new URLSearchParams(params)
+    q.set('deal', next)
+    setParams(q, { replace: true })
+  }
+  return [scenario, setScenario]
+}
+
+export function useLimitedTimeDeal() {
+  const [scenario] = useScenario()
   const now = useNow()
 
-  // Anchored once per scenario so the countdown runs down instead of standing
-  // still — offsets above are relative to when the page was opened.
-  const [origin] = useState(() => Date.now())
-  const { startsAt, endsAt } = SCENARIOS[scenario]
+  // The offsets above are relative to an anchor, so the countdown actually runs
+  // down. Re-anchoring on every switch means each flip restarts the timer from
+  // the top — otherwise a long review session would run a scenario out and the
+  // banner would vanish the moment you selected it.
+  const [anchor, setAnchor] = useState(() => ({ scenario, at: Date.now() }))
+  if (anchor.scenario !== scenario) setAnchor({ scenario, at: Date.now() })
 
-  const start = origin + startsAt
-  const end = origin + endsAt
+  const { startsAt, endsAt } = SCENARIOS[anchor.scenario]
+  const start = anchor.at + startsAt
+  const end = anchor.at + endsAt
   const state = now < start ? 'upcoming' : now < end ? 'live' : 'ended'
   const remaining = Math.max(0, (state === 'upcoming' ? start : end) - now)
 
   return { state, remaining }
+}
+
+/* Design-review control, not product UI — floats over the gallery so you can
+   flip states without hand-editing the URL. */
+export function DealSwitcher() {
+  const [scenario, setScenario] = useScenario()
+  return (
+    <div className="deal-switch" role="group" aria-label="Limited time deal state">
+      <span className="deal-switch-label">Deal</span>
+      {[
+        ['live', 'Active'],
+        ['upcoming', 'Inactive'],
+      ].map(([value, label]) => (
+        <button
+          key={value}
+          type="button"
+          className={`deal-switch-btn${scenario === value ? ' on' : ''}`}
+          aria-pressed={scenario === value}
+          onClick={() => setScenario(value)}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  )
 }
 
 /* "01: 20: 24" — the spaced format the design uses. Hours are uncapped so a

@@ -452,3 +452,38 @@
   cursor: pointer; white-space: nowrap;
 }
 .ltd-notify:hover { background: var(--blue-tint); }
+
+/* Floating state switcher — a design-review affordance, deliberately styled
+   apart from the PDP chrome so it never reads as part of the product. Sits
+   above the overlaid top bar (z-index 10). */
+.deal-switch-dock {
+  position: absolute;
+  top: calc(78px + env(safe-area-inset-top)); /* clears the overlaid top nav */
+  left: 0; right: 0;
+  z-index: 20;
+  display: flex; justify-content: center;
+}
+.deal-switch {
+  display: flex; align-items: center; gap: 3px;
+  padding: 3px 3px 3px 10px;
+  border-radius: 9999px;
+  background: rgba(16, 22, 40, 0.82);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 14px rgba(16, 22, 40, 0.24);
+}
+.deal-switch-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+  text-transform: uppercase; color: rgba(255, 255, 255, 0.62);
+  padding-right: 3px;
+}
+.deal-switch-btn {
+  border: 0; cursor: pointer;
+  padding: 5px 12px; border-radius: 9999px;
+  background: transparent; color: rgba(255, 255, 255, 0.72);
+  font-family: inherit; font-size: 12px; font-weight: 600; letter-spacing: -0.1px;
+}
+.deal-switch-btn:hover { color: var(--white); }
+.deal-switch-btn.on {
+  background: var(--white); color: var(--ink);
+  box-shadow: 0 1px 3px rgba(16, 22, 40, 0.18);
+}
