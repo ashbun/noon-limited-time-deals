@@ -4,8 +4,9 @@ Prototype storefront for noon experimentation. Vite + React.
 
 **Live:** https://noon-limited-time-deals.vercel.app
 
-Deploys are manual — the Vercel project isn't connected to this repo, so
-pushing here does not publish. To ship: `vercel deploy --prod`
+Pushing to `main` deploys to production automatically — the Vercel project is
+connected to this repo. Pushes to any other branch get their own preview URL.
+To deploy by hand instead: `vercel deploy --prod`
 
 ```bash
 npm install
