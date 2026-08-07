@@ -111,19 +111,18 @@ export default function LimitedTimeDeal({ deal, price, was, off, dh: Dh }) {
           {/* inner box spans only the ribbon's solid part, so centring here
               centres against the purple rather than the slanted tail */}
           <span className="ltd-head-left-inner">
-            <img className="ltd-bolt" src="/pdp/icons/deal-bolt.svg" alt="" width="14" height="14" />
+            <span className="ltd-ico ltd-ico--14">
+              <img src="/pdp/icons/deal-bolt.svg" alt="" />
+            </span>
             <span className="ltd-label">Limited time deal</span>
           </span>
         </div>
+        <span className="ltd-head-gap" aria-hidden="true" />
         <div className="ltd-head-right">
           {/* a padlock while the deal is still shut, a timelapse once it's running */}
-          <img
-            className="ltd-head-icon"
-            src={live ? '/pdp/icons/deal-timelapse.svg' : '/pdp/icons/deal-lock-purple.svg'}
-            alt=""
-            width="14"
-            height="14"
-          />
+          <span className="ltd-ico ltd-ico--14">
+            <img src={live ? '/pdp/icons/deal-timelapse.svg' : '/pdp/icons/deal-lock-purple.svg'} alt="" />
+          </span>
           <span className="ltd-timer">
             {live ? 'Ending in' : 'Unlocks in'}{' '}
             <b>{formatCountdown(deal.remaining)}</b>
@@ -148,7 +147,9 @@ export default function LimitedTimeDeal({ deal, price, was, off, dh: Dh }) {
         </div>
         {!live && (
           <button className="ltd-notify" type="button">
-            <img src="/pdp/icons/deal-bell.svg" alt="" width="20" height="20" />
+            <span className="ltd-ico ltd-ico--20">
+              <img src="/pdp/icons/deal-bell.svg" alt="" />
+            </span>
             Notify me
           </button>
         )}

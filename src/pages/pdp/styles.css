@@ -391,6 +391,10 @@
   flex: 1 1 auto; min-width: 163px;
   height: 30px;
 }
+/* Pulls the ribbon's right edge back by 16px. A shrinkable spacer rather than a
+   margin so that on narrow phones, where the header has no slack at all, this
+   collapses before the countdown starts losing characters. */
+.ltd-head-gap { flex: 0 100 16px; min-width: 0; }
 .ltd-ribbon { position: absolute; inset: 0; width: 100%; height: 100%; }
 /* 78.2% is where the ribbon's bottom edge ends and the tail starts slanting
    away. Keeping the inner box to that share means the label stays centred on
@@ -400,7 +404,15 @@
   width: 78.2%; height: 100%;
   display: flex; align-items: center; justify-content: center; gap: 6px;
 }
-.ltd-bolt { flex: 0 0 auto; }
+/* Figma exports each glyph at its own vector size, inset inside a square slot
+   (a 20px slot holds a 12.92x14.79 bell, a 14px slot an 10.5x12.25 bolt, and so
+   on). The artwork carries preserveAspectRatio="none", so forcing the image to
+   the slot size both oversizes and distorts it — the slot is the box, the image
+   keeps its intrinsic size and centres inside. */
+.ltd-ico { flex: 0 0 auto; display: grid; place-items: center; }
+.ltd-ico--14 { width: 14px; height: 14px; }
+.ltd-ico--20 { width: 20px; height: 20px; }
+.ltd-ico img { display: block; max-width: 100%; max-height: 100%; }
 .ltd-label {
   position: relative;
   font-size: 12px; font-weight: 700; line-height: normal;
@@ -415,7 +427,6 @@
   display: flex; align-items: center; justify-content: center; gap: 4px;
   padding: 0 8px;
 }
-.ltd-head-icon { flex: 0 0 auto; }
 .ltd-timer {
   font-size: 13px; font-weight: 500; line-height: 20px;
   letter-spacing: -0.1px; color: #3536da; white-space: nowrap;
@@ -464,6 +475,7 @@
   border: 1px solid var(--line-2); border-radius: 10px;
   background: var(--white); color: var(--blue2);
   font-family: inherit; font-size: 12px; font-weight: 600; line-height: 16px;
+  letter-spacing: 0; /* A12/SemiBold sets tracking to 0, not the font default */
   cursor: pointer; white-space: nowrap;
 }
 .ltd-notify:hover { background: var(--blue-tint); }
