@@ -67,13 +67,12 @@ export function useLimitedTimeDeal() {
   return { state, remaining }
 }
 
-/* Design-review control, not product UI — floats over the gallery so you can
-   flip states without hand-editing the URL. */
+/* Design-review control, not product UI — lives in the top bar so you can flip
+   states without hand-editing the URL. */
 export function DealSwitcher() {
   const [scenario, setScenario] = useScenario()
   return (
     <div className="deal-switch" role="group" aria-label="Limited time deal state">
-      <span className="deal-switch-label">Deal</span>
       {[
         ['live', 'Active'],
         ['upcoming', 'Inactive'],
@@ -109,13 +108,20 @@ export default function LimitedTimeDeal({ deal, price, was, off, dh: Dh }) {
       <div className="ltd-head">
         <div className="ltd-head-left">
           <img className="ltd-ribbon" src="/pdp/icons/deal-ribbon.svg" alt="" width="163" height="30" />
-          <img className="ltd-lock" src="/pdp/icons/deal-lock.svg" alt="" width="14" height="14" />
+          <img className="ltd-bolt" src="/pdp/icons/deal-bolt.svg" alt="" width="14" height="14" />
           <span className="ltd-label">Limited time deal</span>
         </div>
         <div className="ltd-head-right">
-          {live && <img className="ltd-clock" src="/pdp/icons/deal-clock.svg" alt="" width="14" height="14" />}
+          {/* a padlock while the deal is still shut, a timelapse once it's running */}
+          <img
+            className="ltd-head-icon"
+            src={live ? '/pdp/icons/deal-timelapse.svg' : '/pdp/icons/deal-lock-purple.svg'}
+            alt=""
+            width="14"
+            height="14"
+          />
           <span className="ltd-timer">
-            {live ? 'Ending in' : 'Unlocking in'}{' '}
+            {live ? 'Ending in' : 'Unlocks in'}{' '}
             <b>{formatCountdown(deal.remaining)}</b>
           </span>
         </div>

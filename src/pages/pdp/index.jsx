@@ -33,10 +33,6 @@ function PDP() {
   const { scrollY } = useScroll({ container: scrollRef })
   const imgScale = useTransform(scrollY, [0, 320], [1, 0.7], { clamp: true })
   const imgOpacity = useTransform(scrollY, [0, 260, 400], [1, 1, 0.35], { clamp: true })
-  // The state switcher is pinned, so it would sit on top of the sections once
-  // they scroll up under it — fade it out with the gallery instead.
-  const switcherOpacity = useTransform(scrollY, [60, 200], [1, 0], { clamp: true })
-  const switcherEvents = useTransform(scrollY, (y) => (y > 190 ? 'none' : 'auto'))
 
   return (
     <div className="pdp">
@@ -55,12 +51,6 @@ function PDP() {
           <Reviews />
         </div>
       </div>
-      <motion.div
-        className="deal-switch-dock"
-        style={{ opacity: switcherOpacity, pointerEvents: switcherEvents }}
-      >
-        <DealSwitcher />
-      </motion.div>
       <BottomNav />
     </div>
   )
@@ -94,6 +84,7 @@ function TopNav({ state = 1, onBack }) {
       <button className="tb-btn" onClick={onBack} aria-label="Back">
         <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden><path fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6"/></svg>
       </button>
+      <DealSwitcher />
       <div className="tb-actions">
         {state === 2 ? (
           <motion.button

@@ -388,7 +388,7 @@
   height: 30px; padding: 8px 12px;
 }
 .ltd-ribbon { position: absolute; inset: 0; width: 163px; height: 30px; }
-.ltd-lock { position: relative; flex: 0 0 auto; }
+.ltd-bolt { position: relative; flex: 0 0 auto; }
 .ltd-label {
   position: relative;
   font-size: 12px; font-weight: 700; line-height: normal;
@@ -400,10 +400,10 @@
   flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px;
   padding: 0 12px;
 }
-.ltd-clock { flex: 0 0 auto; }
+.ltd-head-icon { flex: 0 0 auto; }
 .ltd-timer {
-  font-size: 12px; font-weight: 500; line-height: 18px;
-  letter-spacing: -0.1px; color: #2122b8; white-space: nowrap;
+  font-size: 13px; font-weight: 500; line-height: 20px;
+  letter-spacing: -0.1px; color: #3536da; white-space: nowrap;
 }
 .ltd-timer b { font-weight: 700; }
 
@@ -456,31 +456,21 @@
 /* Floating state switcher — a design-review affordance, deliberately styled
    apart from the PDP chrome so it never reads as part of the product. Sits
    above the overlaid top bar (z-index 10). */
-.deal-switch-dock {
-  position: absolute;
-  top: calc(78px + env(safe-area-inset-top)); /* clears the overlaid top nav */
-  left: 0; right: 0;
-  z-index: 20;
-  display: flex; justify-content: center;
-}
 .deal-switch {
-  display: flex; align-items: center; gap: 3px;
-  padding: 3px 3px 3px 10px;
+  flex: 0 1 auto; min-width: 0;
+  display: flex; align-items: center; gap: 2px;
+  padding: 3px;
   border-radius: 9999px;
   background: rgba(16, 22, 40, 0.82);
   backdrop-filter: blur(6px);
-  box-shadow: 0 4px 14px rgba(16, 22, 40, 0.24);
-}
-.deal-switch-label {
-  font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
-  text-transform: uppercase; color: rgba(255, 255, 255, 0.62);
-  padding-right: 3px;
+  box-shadow: 0 2px 8px rgba(16, 22, 40, 0.2);
 }
 .deal-switch-btn {
   border: 0; cursor: pointer;
-  padding: 5px 12px; border-radius: 9999px;
+  padding: 5px 10px; border-radius: 9999px;
   background: transparent; color: rgba(255, 255, 255, 0.72);
   font-family: inherit; font-size: 12px; font-weight: 600; letter-spacing: -0.1px;
+  white-space: nowrap;
 }
 .deal-switch-btn:hover { color: var(--white); }
 .deal-switch-btn.on {
