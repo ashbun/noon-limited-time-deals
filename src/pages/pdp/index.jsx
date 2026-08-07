@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
 import LimitedTimeDeal, { DealSwitcher, formatCountdown, useLimitedTimeDeal } from './LimitedTimeDeal'
 import './styles.css'
 
@@ -26,15 +26,70 @@ export default function PdpPage() {
   )
 }
 
+function TouchPoints() {
+  return (
+    <button className="touch-points" type="button" aria-label="Touch points">
+      <img src="/pdp/icons/touch-points.svg" alt="" width="24" height="27" />
+    </button>
+  )
+}
+
+function NotifyToast({ onDismiss }) {
+  const reduceMotion = useReducedMotion()
+
+  return (
+    <motion.div
+      className="notify-toast"
+      data-testid="notify-toast"
+      role="status"
+      aria-live="polite"
+      initial={reduceMotion ? false : { opacity: 0, y: -12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -12 }}
+      transition={{ duration: reduceMotion ? 0 : 0.18, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <span className="notify-toast-icon" aria-hidden="true">
+        <img src="/pdp/icons/notify-toast-bell.svg" alt="" />
+      </span>
+      <span className="notify-toast-message">You'll be notified when the deal unlocks</span>
+      <button className="notify-toast-close" type="button" aria-label="Close notification" onClick={onDismiss}>
+        <img src="/pdp/icons/notify-toast-close.svg" alt="" />
+      </button>
+    </motion.div>
+  )
+}
+
 function PDP() {
   // Scroll-linked gallery: the product image shrinks as the page scrolls,
   // so the content sliding over the pinned gallery feels more interactive.
   const scrollRef = useRef(null)
   const deal = useLimitedTimeDeal()
   const [showBottomDeal, setShowBottomDeal] = useState(false)
+  const [notified, setNotified] = useState(false)
+  const [showNotifyToast, setShowNotifyToast] = useState(false)
+  const notifyTimerRef = useRef(null)
   const { scrollY } = useScroll({ container: scrollRef })
   const imgScale = useTransform(scrollY, [0, 320], [1, 0.7], { clamp: true })
   const imgOpacity = useTransform(scrollY, [0, 260, 400], [1, 1, 0.35], { clamp: true })
+
+  const dismissNotifyToast = () => {
+    window.clearTimeout(notifyTimerRef.current)
+    notifyTimerRef.current = null
+    setShowNotifyToast(false)
+  }
+
+  const requestDealNotification = () => {
+    if (notified) return
+    setNotified(true)
+    setShowNotifyToast(true)
+    window.clearTimeout(notifyTimerRef.current)
+    notifyTimerRef.current = window.setTimeout(() => {
+      setShowNotifyToast(false)
+      notifyTimerRef.current = null
+    }, 4000)
+  }
+
+  useEffect(() => () => window.clearTimeout(notifyTimerRef.current), [])
 
   useEffect(() => {
     const scroller = scrollRef.current
@@ -68,11 +123,14 @@ function PDP() {
 
   return (
     <div className="pdp">
+      <AnimatePresence>
+        {showNotifyToast && <NotifyToast onDismiss={dismissNotifyToast} />}
+      </AnimatePresence>
       <StatusBar />
       <div className="pdp-scroll" ref={scrollRef}>
         <Gallery imgScale={imgScale} imgOpacity={imgOpacity} />
         <div className="pdp-sections">
-          <MainInfo deal={deal} />
+          <MainInfo deal={deal} notified={notified} onNotify={requestDealNotification} />
           <Delivery />
           <PaymentOffers />
           <VariantPicker />
@@ -83,7 +141,12 @@ function PDP() {
           <Reviews />
         </div>
       </div>
-      <BottomNav deal={deal} showDeal={showBottomDeal} />
+      <BottomNav
+        deal={deal}
+        showDeal={showBottomDeal}
+        notified={notified}
+        onNotify={requestDealNotification}
+      />
     </div>
   )
 }
@@ -91,7 +154,7 @@ function PDP() {
 /* -------------------------------- Bottom nav ------------------------------- */
 /* Both CTAs are inert — the cart sheet and checkout flow they used to open
    were dropped when this was trimmed to the PDP view alone. */
-function BottomDeal({ deal }) {
+function BottomDeal({ deal, notified, onNotify }) {
   const live = deal.state === 'live'
 
   return (
@@ -105,7 +168,7 @@ function BottomDeal({ deal }) {
           alt=""
         />
         <span className="bottom-deal-left-content">
-          <span className={`bottom-deal-icon${live ? ' bottom-deal-icon--20' : ''}`}>
+          <span className="bottom-deal-icon">
             <img
               src={live ? '/pdp/icons/deal-sticky-bolt.svg' : '/pdp/icons/deal-sticky-lock.svg'}
               alt=""
@@ -130,7 +193,13 @@ function BottomDeal({ deal }) {
             <span>Ending in <b>{formatCountdown(deal.remaining)}</b></span>
           </span>
         ) : (
-          <button className="bottom-deal-notify" type="button">
+          <button
+            className="bottom-deal-notify"
+            type="button"
+            data-testid="bottom-strip-notify"
+            disabled={notified}
+            onClick={onNotify}
+          >
             <span className="bottom-deal-icon">
               <img src="/pdp/icons/deal-sticky-bell.svg" alt="" />
             </span>
@@ -142,10 +211,34 @@ function BottomDeal({ deal }) {
   )
 }
 
-function BottomNav({ deal, showDeal }) {
+function BottomNav({ deal, showDeal, notified, onNotify }) {
+  const reduceMotion = useReducedMotion()
+
   return (
     <div className="pdp-bottomnav">
-      {showDeal && deal.state !== 'ended' && <BottomDeal deal={deal} />}
+      <TouchPoints />
+      <AnimatePresence initial={false}>
+        {showDeal && deal.state !== 'ended' && (
+          <motion.div
+            className="bottom-deal-reveal"
+            initial={reduceMotion ? false : { height: 0, opacity: 0, y: 36 }}
+            animate={{ height: 36, opacity: 1, y: 0 }}
+            exit={reduceMotion
+              ? { height: 0, opacity: 0 }
+              : {
+                  height: 0,
+                  opacity: 0,
+                  y: 36,
+                  transition: { duration: 0.36, ease: [0.4, 0, 1, 1] },
+                }}
+            transition={reduceMotion
+              ? { duration: 0 }
+              : { duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <BottomDeal deal={deal} notified={notified} onNotify={onNotify} />
+          </motion.div>
+        )}
+      </AnimatePresence>
       <div className="pdp-bottomnav-row">
         <div className="qty-box">
           <span className="qty-label">QTY</span>
@@ -245,7 +338,7 @@ function UnitDetails() {
   )
 }
 
-function MainInfo({ deal }) {
+function MainInfo({ deal, notified, onNotify }) {
   return (
     <section className="main-info">
       <div className="store-row">
@@ -285,7 +378,7 @@ function MainInfo({ deal }) {
       )}
 
       {deal.state === 'upcoming' && <UnitDetails />}
-      <LimitedTimeDeal deal={deal} dh={Dh} {...DEAL} />
+      <LimitedTimeDeal deal={deal} dh={Dh} notified={notified} onNotify={onNotify} {...DEAL} />
       {deal.state !== 'upcoming' && <UnitDetails />}
 
       <div className="coupons">

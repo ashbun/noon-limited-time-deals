@@ -154,7 +154,7 @@ function AnimatedDealPrice({ price, dh: Dh }) {
           const digits = buildDigitReel(start, end)
           const transitions = digits.length - 1
           const style = {
-            '--slot-delay': `${400 + reelIndex * 45}ms`,
+            '--slot-delay': `${1000 + reelIndex * 45}ms`,
             '--slot-duration': `${500 + transitions * 75}ms`,
             '--slot-distance': `${transitions * -28}px`,
           }
@@ -172,11 +172,23 @@ function AnimatedDealPrice({ price, dh: Dh }) {
   )
 }
 
-export default function LimitedTimeDeal({ deal, price, upcomingWas, liveWas, off, dh: Dh }) {
+export default function LimitedTimeDeal({ deal, price, upcomingWas, liveWas, off, dh: Dh, notified, onNotify }) {
   const [widgetRef, inView] = useViewportPresence()
-  if (deal.state === 'ended') return null
   const live = deal.state === 'live'
+  if (deal.state === 'ended') return null
   const was = live ? liveWas : upcomingWas
+
+  const timer = (
+    <>
+      <span className="ltd-ico ltd-ico--14">
+        <img src={live ? '/pdp/icons/deal-timelapse.svg' : '/pdp/icons/deal-lock-purple.svg'} alt="" />
+      </span>
+      <span className="ltd-timer">
+        {live ? 'Ending in' : 'Unlocks in'}{' '}
+        <b>{formatCountdown(deal.remaining)}</b>
+      </span>
+    </>
+  )
 
   return (
     <div ref={widgetRef} className={`ltd${live ? ' ltd--live' : ''}${inView ? ' ltd--in-view' : ''}`}>
@@ -191,16 +203,7 @@ export default function LimitedTimeDeal({ deal, price, upcomingWas, liveWas, off
             <span className="ltd-label">Limited time deal</span>
           </span>
         </div>
-        <div className="ltd-head-right">
-          {/* a padlock while the deal is still shut, a timelapse once it's running */}
-          <span className="ltd-ico ltd-ico--14">
-            <img src={live ? '/pdp/icons/deal-timelapse.svg' : '/pdp/icons/deal-lock-purple.svg'} alt="" />
-          </span>
-          <span className="ltd-timer">
-            {live ? 'Ending in' : 'Unlocks in'}{' '}
-            <b>{formatCountdown(deal.remaining)}</b>
-          </span>
-        </div>
+        <div className="ltd-head-right">{timer}</div>
       </div>
 
       <div className="ltd-body">
@@ -219,7 +222,13 @@ export default function LimitedTimeDeal({ deal, price, upcomingWas, liveWas, off
           </span>
         </div>
         {!live && (
-          <button className="ltd-notify" type="button">
+          <button
+            className="ltd-notify"
+            type="button"
+            data-testid="widget-notify"
+            disabled={notified}
+            onClick={onNotify}
+          >
             <span className="ltd-ico ltd-ico--20">
               <img src="/pdp/icons/deal-bell.svg" alt="" />
             </span>
