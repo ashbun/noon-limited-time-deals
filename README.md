@@ -1,6 +1,11 @@
 # noon — limited time deals
 
-Prototype storefront for noon experimentation. Vite + React, deployed on Vercel.
+Prototype storefront for noon experimentation. Vite + React.
+
+**Live:** https://noon-limited-time-deals.vercel.app
+
+Deploys are manual — the Vercel project isn't connected to this repo, so
+pushing here does not publish. To ship: `vercel deploy --prod`
 
 ```bash
 npm install
