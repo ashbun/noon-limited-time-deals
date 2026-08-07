@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
-// Limited-time deal banner — Figma "PDP new features" node 22621:124565.
+// Limited-time deal banner — Figma "PDP new features" node 22627:19400.
 //
 // Two states, driven by the clock rather than a prop, so the widget behaves
 // like the real thing:
@@ -93,23 +93,97 @@ export function DealSwitcher() {
 
 /* "01: 20: 24" — the spaced format the design uses. Hours are uncapped so a
    multi-day deal reads 52: 30: 00 rather than silently wrapping. */
-function formatCountdown(ms) {
+export function formatCountdown(ms) {
   const total = Math.floor(ms / SECOND)
   const pad = (n) => String(n).padStart(2, '0')
   return `${pad(Math.floor(total / 3600))}: ${pad(Math.floor(total / 60) % 60)}: ${pad(total % 60)}`
 }
 
-export default function LimitedTimeDeal({ deal, price, was, off, dh: Dh }) {
-  if (deal.state === 'ended') return null
-  const live = deal.state === 'live'
+function useViewportPresence() {
+  const ref = useRef(null)
+  const [inView, setInView] = useState(false)
+
+  useEffect(() => {
+    const node = ref.current
+    if (!node || typeof IntersectionObserver === 'undefined') {
+      setInView(true)
+      return undefined
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold: 0.6 },
+    )
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
+
+  return [ref, inView]
+}
+
+const INITIAL_DEAL_PRICE = '349.99'
+
+function buildDigitReel(start, end) {
+  const digits = [start]
+  let current = Number(start)
+
+  do {
+    current = (current + 9) % 10
+    digits.push(String(current))
+  } while (String(current) !== end)
+
+  return digits
+}
+
+function AnimatedDealPrice({ price, dh: Dh }) {
+  const finalPrice = String(price)
+  let reelIndex = -1
 
   return (
-    <div className={`ltd${live ? ' ltd--live' : ''}`}>
+    <span className="ltd-now ltd-price-slot">
+      <span className="ltd-price-slot-label"><Dh />{price}</span>
+      <span className="ltd-price-slot-visual" aria-hidden="true">
+        <Dh />
+        {[...finalPrice].map((end, index) => {
+          if (!/\d/.test(end)) {
+            return <span className="ltd-price-decimal" key={`${end}-${index}`}>{end}</span>
+          }
+
+          reelIndex += 1
+          const start = INITIAL_DEAL_PRICE[index] ?? end
+          const digits = buildDigitReel(start, end)
+          const transitions = digits.length - 1
+          const style = {
+            '--slot-delay': `${400 + reelIndex * 45}ms`,
+            '--slot-duration': `${500 + transitions * 75}ms`,
+            '--slot-distance': `${transitions * -28}px`,
+          }
+
+          return (
+            <span className="ltd-price-digit" style={style} key={`${index}-${start}-${end}`}>
+              <span className="ltd-price-digit-track">
+                {digits.map((digit, step) => <span key={`${digit}-${step}`}>{digit}</span>)}
+              </span>
+            </span>
+          )
+        })}
+      </span>
+    </span>
+  )
+}
+
+export default function LimitedTimeDeal({ deal, price, upcomingWas, liveWas, off, dh: Dh }) {
+  const [widgetRef, inView] = useViewportPresence()
+  if (deal.state === 'ended') return null
+  const live = deal.state === 'live'
+  const was = live ? liveWas : upcomingWas
+
+  return (
+    <div ref={widgetRef} className={`ltd${live ? ' ltd--live' : ''}${inView ? ' ltd--in-view' : ''}`}>
       <div className="ltd-head">
         <div className="ltd-head-left">
-          <img className="ltd-ribbon" src="/pdp/icons/deal-ribbon.svg" alt="" width="163" height="30" />
-          {/* inner box spans only the ribbon's solid part, so centring here
-              centres against the purple rather than the slanted tail */}
+          <img className="ltd-ribbon" src="/pdp/icons/deal-ribbon.svg" alt="" width="164" height="30" />
+          <span className="ltd-shimmer" aria-hidden="true" />
           <span className="ltd-head-left-inner">
             <span className="ltd-ico ltd-ico--14">
               <img src="/pdp/icons/deal-bolt.svg" alt="" />
@@ -117,7 +191,6 @@ export default function LimitedTimeDeal({ deal, price, was, off, dh: Dh }) {
             <span className="ltd-label">Limited time deal</span>
           </span>
         </div>
-        <span className="ltd-head-gap" aria-hidden="true" />
         <div className="ltd-head-right">
           {/* a padlock while the deal is still shut, a timelapse once it's running */}
           <span className="ltd-ico ltd-ico--14">
@@ -139,7 +212,7 @@ export default function LimitedTimeDeal({ deal, price, was, off, dh: Dh }) {
             {!live && <span className="ltd-now"><Dh />{price}</span>}
           </span>
           <span className="ltd-price-figures">
-            {live && <span className="ltd-now"><Dh />{price}</span>}
+            {live && <AnimatedDealPrice price={price} dh={Dh} />}
             <span className="ltd-was"><Dh />{was}</span>
             <span className="ltd-off">{off}% OFF</span>
             {live && <span className="ltd-vat">(incl. of VAT)</span>}

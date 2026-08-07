@@ -1,6 +1,6 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion'
-import LimitedTimeDeal, { DealSwitcher, useLimitedTimeDeal } from './LimitedTimeDeal'
+import LimitedTimeDeal, { DealSwitcher, formatCountdown, useLimitedTimeDeal } from './LimitedTimeDeal'
 import './styles.css'
 
 // Product page, ported from ashbun/noon-pdp-prototype and trimmed to the PDP
@@ -30,9 +30,41 @@ function PDP() {
   // Scroll-linked gallery: the product image shrinks as the page scrolls,
   // so the content sliding over the pinned gallery feels more interactive.
   const scrollRef = useRef(null)
+  const deal = useLimitedTimeDeal()
+  const [showBottomDeal, setShowBottomDeal] = useState(false)
   const { scrollY } = useScroll({ container: scrollRef })
   const imgScale = useTransform(scrollY, [0, 320], [1, 0.7], { clamp: true })
   const imgOpacity = useTransform(scrollY, [0, 260, 400], [1, 1, 0.35], { clamp: true })
+
+  useEffect(() => {
+    const scroller = scrollRef.current
+    if (!scroller) return undefined
+
+    let frame = 0
+    const updateBottomDeal = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        const widget = scroller.querySelector('.ltd')
+        if (!widget || deal.state === 'ended') {
+          setShowBottomDeal(false)
+          return
+        }
+
+        const scrollTop = scroller.getBoundingClientRect().top
+        const widgetBottom = widget.getBoundingClientRect().bottom
+        setShowBottomDeal(widgetBottom <= scrollTop)
+      })
+    }
+
+    updateBottomDeal()
+    scroller.addEventListener('scroll', updateBottomDeal, { passive: true })
+    window.addEventListener('resize', updateBottomDeal)
+    return () => {
+      cancelAnimationFrame(frame)
+      scroller.removeEventListener('scroll', updateBottomDeal)
+      window.removeEventListener('resize', updateBottomDeal)
+    }
+  }, [deal.state])
 
   return (
     <div className="pdp">
@@ -40,7 +72,7 @@ function PDP() {
       <div className="pdp-scroll" ref={scrollRef}>
         <Gallery imgScale={imgScale} imgOpacity={imgOpacity} />
         <div className="pdp-sections">
-          <MainInfo />
+          <MainInfo deal={deal} />
           <Delivery />
           <PaymentOffers />
           <VariantPicker />
@@ -51,7 +83,7 @@ function PDP() {
           <Reviews />
         </div>
       </div>
-      <BottomNav />
+      <BottomNav deal={deal} showDeal={showBottomDeal} />
     </div>
   )
 }
@@ -59,9 +91,61 @@ function PDP() {
 /* -------------------------------- Bottom nav ------------------------------- */
 /* Both CTAs are inert — the cart sheet and checkout flow they used to open
    were dropped when this was trimmed to the PDP view alone. */
-function BottomNav() {
+function BottomDeal({ deal }) {
+  const live = deal.state === 'live'
+
+  return (
+    <div className={`bottom-deal${live ? ' bottom-deal--live' : ''}`}>
+      <div className="bottom-deal-left">
+        <img
+          className="bottom-deal-ribbon"
+          src={live
+            ? '/pdp/icons/deal-sticky-active-ribbon.svg'
+            : '/pdp/icons/deal-sticky-inactive-ribbon.svg'}
+          alt=""
+        />
+        <span className="bottom-deal-left-content">
+          <span className={`bottom-deal-icon${live ? ' bottom-deal-icon--20' : ''}`}>
+            <img
+              src={live ? '/pdp/icons/deal-sticky-bolt.svg' : '/pdp/icons/deal-sticky-lock.svg'}
+              alt=""
+            />
+          </span>
+          <span className="bottom-deal-label">
+            {live ? (
+              'Limited time deal'
+            ) : (
+              <>Deal unlocks in <b>{formatCountdown(deal.remaining)}</b></>
+            )}
+          </span>
+        </span>
+      </div>
+
+      <div className="bottom-deal-right">
+        {live ? (
+          <span className="bottom-deal-ending">
+            <span className="bottom-deal-icon">
+              <img src="/pdp/icons/deal-sticky-timelapse.svg" alt="" />
+            </span>
+            <span>Ending in <b>{formatCountdown(deal.remaining)}</b></span>
+          </span>
+        ) : (
+          <button className="bottom-deal-notify" type="button">
+            <span className="bottom-deal-icon">
+              <img src="/pdp/icons/deal-sticky-bell.svg" alt="" />
+            </span>
+            Notify me
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function BottomNav({ deal, showDeal }) {
   return (
     <div className="pdp-bottomnav">
+      {showDeal && deal.state !== 'ended' && <BottomDeal deal={deal} />}
       <div className="pdp-bottomnav-row">
         <div className="qty-box">
           <span className="qty-label">QTY</span>
@@ -147,13 +231,21 @@ function InfoDot() {
   return <svg width="15" height="15" viewBox="0 0 24 24" className="i-info" aria-hidden><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.7"/><path fill="currentColor" d="M11 10h2v7h-2zm0-4h2v2h-2z"/></svg>
 }
 
-// The deal's regular price stays 109; the deal itself undercuts it at 89, so
-// the upcoming state has something better to tease than what's already shown.
-const DEAL = { price: 89, was: 209, off: 57 }
+// The two reference states use different comparison prices while sharing the
+// same deal price and discount.
+const DEAL = { price: '300.99', upcomingWas: '500.99', liveWas: 899, off: 60 }
 
-function MainInfo() {
-  const deal = useLimitedTimeDeal()
+function UnitDetails() {
+  return (
+    <div className="unit-row">
+      <span>500ml</span>
+      <span className="unit-div" />
+      <span><Dh />2.35/ml</span>
+    </div>
+  )
+}
 
+function MainInfo({ deal }) {
   return (
     <section className="main-info">
       <div className="store-row">
@@ -192,19 +284,9 @@ function MainInfo() {
         </div>
       )}
 
+      {deal.state === 'upcoming' && <UnitDetails />}
       <LimitedTimeDeal deal={deal} dh={Dh} {...DEAL} />
-
-      <div className="combo-row">
-        <img className="combo-ico" src="/pdp/icons/combo-icon.gif" alt="" width="20" height="20" />
-        <span className="combo-txt">Saving <Dh />45 with Combo</span>
-        <InfoDot />
-      </div>
-
-      <div className="unit-row">
-        <span>500ml</span>
-        <span className="unit-div" />
-        <span><Dh />2.35/ml</span>
-      </div>
+      {deal.state !== 'upcoming' && <UnitDetails />}
 
       <div className="coupons">
         <span className="coupon">

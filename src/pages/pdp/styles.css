@@ -70,6 +70,54 @@
   background: var(--white);
   box-shadow: 0 -2px 4px rgba(0,0,0,.05);
 }
+.bottom-deal {
+  flex: 0 0 36px; height: 36px;
+  display: flex; align-items: stretch;
+  overflow: hidden; background: #edeefd;
+}
+.bottom-deal-left {
+  position: relative; flex: 0 0 243px; width: 243px; height: 36px;
+}
+.bottom-deal--live .bottom-deal-left { flex-basis: 50%; width: 50%; }
+.bottom-deal-ribbon { position: absolute; inset: 0; width: 100%; height: 100%; }
+.bottom-deal-left-content {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; gap: 6px;
+  height: 36px; padding: 8px 12px; color: #fff;
+}
+.bottom-deal-icon {
+  flex: 0 0 16px; width: 16px; height: 16px;
+  display: grid; place-items: center;
+}
+.bottom-deal-icon--20 { flex-basis: 20px; width: 20px; height: 20px; }
+.bottom-deal-icon img { display: block; max-width: 100%; max-height: 100%; }
+.bottom-deal-label {
+  font-size: 14px; font-weight: 600; line-height: 20px;
+  letter-spacing: -0.14px; white-space: nowrap;
+}
+.bottom-deal-label b { font-weight: 700; font-variant-numeric: tabular-nums; }
+.bottom-deal-right {
+  flex: 1 1 auto; min-width: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.bottom-deal--live .bottom-deal-right { flex-basis: 50%; }
+.bottom-deal-notify {
+  width: 108px; height: 28px; padding: 6px 8px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+  border: 0; border-radius: 36px; background: #fff; color: #4f52d4;
+  font-family: inherit; font-size: 12px; font-weight: 600; line-height: 16px;
+  white-space: nowrap; cursor: pointer;
+}
+.bottom-deal-ending {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  color: #3536da; font-size: 14px; font-weight: 500; line-height: 20px;
+  letter-spacing: -0.14px; white-space: nowrap;
+}
+.bottom-deal-ending b {
+  display: inline-block; width: 66px;
+  font-weight: 700; font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
 .pdp-bottomnav-row { display: flex; align-items: center; gap: 8px; height: 72px; padding: 12px; }
 .qty-box {
   flex: 0 0 auto; width: 48px; height: 48px;
@@ -195,16 +243,6 @@
 .price-off { font-size: 14px; font-weight: 700; color: var(--green); }
 .price-vat { font-size: 12px; color: var(--ink-600); }
 .i-info { color: var(--ink-600); align-self: center; }
-
-.combo-row {
-  display: flex; align-items: center; gap: 4px; width: 100%; height: 32px;
-  background: linear-gradient(90deg, #eaf4fe 0%, #ffffff 51%);
-  border-radius: 8px; padding: 8px 6px;
-  font-size: 14px; font-weight: 500; color: #343d54; letter-spacing: -0.07px;
-}
-.combo-ico { flex: 0 0 auto; width: 20px; height: 20px; object-fit: contain; }
-.combo-txt { white-space: nowrap; }
-.combo-row .i-info { color: #666d85; }
 
 .unit-row { display: inline-flex; align-items: center; align-self: flex-start; gap: 6px; background: #f9f9fb; border-radius: 4px; padding: 4px 6px; font-size: 14px; color: #343d54; }
 .unit-div { width: 1px; height: 12px; background: #d5d8e0; }
@@ -363,46 +401,61 @@
 .rv-all-chev { width: 16px; height: 16px; }
 
 /* --------------------------- Limited time deal --------------------------- */
-/* Figma "PDP new features" 22621:124565. Two states share the card and the
-   ribbon header; `.ltd--live` swaps the surface, adds the clock and promotes
-   the price, since in that state the banner replaces the page's price row. */
+/* Figma "PDP new features" 22627:19400. At the 375px design viewport the card
+   is 327px wide: a fixed 164px ribbon and a 163px countdown section. */
 .ltd {
-  border: 1px solid var(--line-2);
+  position: relative;
   border-radius: 16px;
   background: var(--white);
   overflow: hidden;
 }
-.ltd--live {
-  border-color: #f6f6fe;
-  background: linear-gradient(-79deg, #f4f5ff 2%, #ffffff 98%);
+.ltd::after {
+  content: '';
+  position: absolute; inset: 0; z-index: 3;
+  border: 1px solid #f2f3f7;
+  border-radius: inherit;
+  pointer-events: none;
 }
+.ltd--live::after { border-color: #f6f6fe; }
 
-.ltd-head { display: flex; align-items: stretch; background: #edeefd; }
+.ltd-head { display: flex; align-items: center; height: 30px; background: #edeefd; }
 .ltd--live .ltd-head { background: var(--white); }
 
-/* The ribbon takes every pixel the countdown doesn't need, so it grows with the
-   card instead of staying pinned to the 163px it was drawn at. Its artwork has
-   preserveAspectRatio="none", so it stretches cleanly. */
 .ltd-head-left {
   position: relative;
-  /* 163px is the floor at which the label still fits inside the solid part
-     (127px of content / 0.782). Below it the text would run into the slant, so
-     the countdown side gives up its padding first. */
-  flex: 1 1 auto; min-width: 163px;
-  height: 30px;
+  flex: 0 0 164px;
+  width: 164px; height: 30px;
 }
-/* Pulls the ribbon's right edge back by 16px. A shrinkable spacer rather than a
-   margin so that on narrow phones, where the header has no slack at all, this
-   collapses before the countdown starts losing characters. */
-.ltd-head-gap { flex: 0 100 16px; min-width: 0; }
 .ltd-ribbon { position: absolute; inset: 0; width: 100%; height: 100%; }
-/* 78.2% is where the ribbon's bottom edge ends and the tail starts slanting
-   away. Keeping the inner box to that share means the label stays centred on
-   the solid purple at any card width, instead of drifting into the diagonal. */
+.ltd-shimmer {
+  position: absolute; inset: 0; z-index: 1;
+  overflow: hidden; pointer-events: none;
+  -webkit-mask: url('/pdp/icons/deal-ribbon.svg') center / 100% 100% no-repeat;
+  mask: url('/pdp/icons/deal-ribbon.svg') center / 100% 100% no-repeat;
+}
+.ltd-shimmer::after {
+  content: '';
+  position: absolute; top: -15px; bottom: -15px; left: -58px;
+  width: 42px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .78), transparent);
+  filter: blur(.3px);
+  transform: translateX(0) skewX(-18deg);
+  opacity: 0;
+}
+.ltd--in-view .ltd-shimmer::after {
+  /* 800ms sweep + 1500ms transparent pause. */
+  animation: ltd-ribbon-shimmer 2300ms linear infinite;
+}
+@keyframes ltd-ribbon-shimmer {
+  0% { transform: translateX(0) skewX(-18deg); opacity: 0; }
+  5.5652% { opacity: .3; }
+  29.2174% { opacity: .3; }
+  34.7826%, 100% { transform: translateX(245px) skewX(-18deg); opacity: 0; }
+}
 .ltd-head-left-inner {
-  position: relative;
-  width: 78.2%; height: 100%;
-  display: flex; align-items: center; justify-content: center; gap: 6px;
+  position: absolute; left: 10px; top: 8px; z-index: 2;
+  display: flex; align-items: center; gap: 6px;
+  height: 14px;
 }
 /* Figma exports each glyph at its own vector size, inset inside a square slot
    (a 20px slot holds a 12.92x14.79 bell, a 14px slot an 10.5x12.25 bolt, and so
@@ -420,21 +473,30 @@
   white-space: nowrap;
 }
 
-/* Sized to its content so whatever is left over goes to the ribbon, but allowed
-   to compress on narrow phones — the design has no slack below a 327px card. */
 .ltd-head-right {
-  flex: 0 1 auto; min-width: 0;
+  flex: 1 1 163px; min-width: 0; height: 30px;
   display: flex; align-items: center; justify-content: center; gap: 4px;
-  padding: 0 8px;
+  padding: 0 16px 0 12px;
 }
+.ltd--live .ltd-head-right { padding-left: 8px; }
 .ltd-timer {
   font-size: 13px; font-weight: 500; line-height: 20px;
   letter-spacing: -0.1px; color: #3536da; white-space: nowrap;
 }
-.ltd-timer b { font-weight: 700; }
+.ltd-timer b {
+  display: inline-block; width: 62px;
+  font-weight: 700; font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
 
-.ltd-body { display: flex; align-items: center; gap: 8px; padding: 12px; }
-.ltd--live .ltd-body { padding: 10px 12px; }
+.ltd-body {
+  display: flex; align-items: center; gap: 8px;
+  min-height: 67px; padding: 12px;
+}
+.ltd--live .ltd-body {
+  min-height: 68px; padding: 10px 12px;
+  background: linear-gradient(-74.4447deg, #f0f0ff 1.8326%, #fcfcff 98.238%);
+}
 
 .ltd-price { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .ltd-price-head { display: flex; align-items: center; gap: 2px; }
@@ -442,7 +504,10 @@
   font-size: 14px; font-weight: 500; line-height: 20px;
   letter-spacing: -0.1px; color: var(--ink-600);
 }
-.ltd-price-figures { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
+.ltd-price-figures {
+  display: flex; align-items: baseline; gap: 4px;
+  padding-bottom: 1px; white-space: nowrap;
+}
 .ltd-now {
   font-size: 16px; font-weight: 700; line-height: 22px;
   letter-spacing: -0.15px; color: var(--ink-900);
@@ -455,6 +520,7 @@
   font-size: 14px; font-weight: 600; line-height: 18px;
   letter-spacing: -0.14px; color: #189566;
 }
+.ltd:not(.ltd--live) .ltd-off { font-size: 12px; }
 .ltd-vat {
   font-size: 14px; font-weight: 400; line-height: 18px;
   letter-spacing: -0.14px; color: var(--ink-500);
@@ -462,16 +528,50 @@
 
 /* Live promotes the deal price to H20 and puts everything on one baseline. */
 .ltd--live .ltd-price { gap: 0; }
-.ltd--live .ltd-price-figures { gap: 6px; }
+.ltd--live .ltd-price-figures { gap: 6px; padding-bottom: 0; }
 .ltd--live .ltd-now {
   font-size: 20px; line-height: 28px; letter-spacing: -0.25px; color: #4f52d4;
+}
+.ltd-price-slot {
+  position: relative;
+  display: inline-block; height: 28px;
+  overflow: hidden; vertical-align: bottom;
+}
+.ltd-price-slot-label {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+.ltd-price-slot-visual {
+  display: inline-flex; align-items: flex-start;
+  height: 28px; white-space: nowrap;
+}
+.ltd-price-digit {
+  display: inline-block; height: 28px;
+  overflow: hidden;
+}
+.ltd-price-digit-track {
+  display: flex; flex-direction: column; align-items: center;
+  transform: translateY(0);
+}
+.ltd-price-digit-track > span {
+  display: block; flex: 0 0 28px; height: 28px;
+  line-height: 28px; white-space: nowrap;
+}
+.ltd-price-decimal { display: inline-block; height: 28px; line-height: 28px; }
+.ltd--in-view .ltd-price-digit-track {
+  animation: ltd-price-digit-roll var(--slot-duration) cubic-bezier(.22, 1, .36, 1) var(--slot-delay) both;
+}
+@keyframes ltd-price-digit-roll {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(var(--slot-distance)); }
 }
 .ltd--live .ltd-was { font-size: 14px; line-height: 20px; }
 
 .ltd-notify {
   flex: 0 0 auto;
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  height: 40px; padding: 10px 16px; /* Figma pins min and max height to 40 */
+  width: 114px; height: 40px; padding: 10px 16px;
   border: 1px solid var(--line-2); border-radius: 10px;
   background: var(--white); color: var(--blue2);
   font-family: inherit; font-size: 12px; font-weight: 600; line-height: 16px;
@@ -479,6 +579,11 @@
   cursor: pointer; white-space: nowrap;
 }
 .ltd-notify:hover { background: var(--blue-tint); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ltd--in-view .ltd-shimmer::after { animation: none; }
+  .ltd--in-view .ltd-price-digit-track { animation: none; transform: translateY(var(--slot-distance)); }
+}
 
 /* Floating state switcher — a design-review affordance, deliberately styled
    apart from the PDP chrome so it never reads as part of the product. Sits
