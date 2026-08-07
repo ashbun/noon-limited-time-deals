@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion'
+import LimitedTimeDeal, { useLimitedTimeDeal } from './LimitedTimeDeal'
 import './styles.css'
 
 // Product page, ported from ashbun/noon-pdp-prototype and trimmed to the PDP
@@ -145,7 +146,13 @@ function InfoDot() {
   return <svg width="15" height="15" viewBox="0 0 24 24" className="i-info" aria-hidden><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.7"/><path fill="currentColor" d="M11 10h2v7h-2zm0-4h2v2h-2z"/></svg>
 }
 
+// The deal's regular price stays 109; the deal itself undercuts it at 89, so
+// the upcoming state has something better to tease than what's already shown.
+const DEAL = { price: 89, was: 209, off: 57 }
+
 function MainInfo() {
+  const deal = useLimitedTimeDeal()
+
   return (
     <section className="main-info">
       <div className="store-row">
@@ -172,13 +179,19 @@ function MainInfo() {
         </span>
       </div>
 
-      <div className="price-row">
-        <span className="price-now"><Dh />109</span>
-        <span className="price-was"><Dh />209</span>
-        <span className="price-off">47% OFF</span>
-        <span className="price-vat">(incl. of VAT)</span>
-        <InfoDot />
-      </div>
+      {/* while the deal is live its banner carries the price, so this row would
+          otherwise show it twice — the Figma toggles it off for that state */}
+      {deal.state !== 'live' && (
+        <div className="price-row">
+          <span className="price-now"><Dh />109</span>
+          <span className="price-was"><Dh />209</span>
+          <span className="price-off">47% OFF</span>
+          <span className="price-vat">(incl. of VAT)</span>
+          <InfoDot />
+        </div>
+      )}
+
+      <LimitedTimeDeal deal={deal} dh={Dh} {...DEAL} />
 
       <div className="combo-row">
         <img className="combo-ico" src="/pdp/icons/combo-icon.gif" alt="" width="20" height="20" />

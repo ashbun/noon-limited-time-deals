@@ -361,3 +361,94 @@
 .rv-helpful { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--white); font-size: 13px; font-weight: 600; color: var(--ink-800); cursor: pointer; }
 .rv-all { align-self: center; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px; border: 0; background: none; padding: 8px; color: var(--blue); font-size: 14px; font-weight: 700; cursor: pointer; }
 .rv-all-chev { width: 16px; height: 16px; }
+
+/* --------------------------- Limited time deal --------------------------- */
+/* Figma "PDP new features" 22621:124565. Two states share the card and the
+   ribbon header; `.ltd--live` swaps the surface, adds the clock and promotes
+   the price, since in that state the banner replaces the page's price row. */
+.ltd {
+  border: 1px solid var(--line-2);
+  border-radius: 16px;
+  background: var(--white);
+  overflow: hidden;
+}
+.ltd--live {
+  border-color: #f6f6fe;
+  background: linear-gradient(-79deg, #f4f5ff 2%, #ffffff 98%);
+}
+
+.ltd-head { display: flex; align-items: stretch; background: #edeefd; }
+.ltd--live .ltd-head { background: var(--white); }
+
+/* Fixed 163px because the ribbon behind it is a fixed-width slanted shape. */
+.ltd-head-left {
+  position: relative;
+  flex: 0 0 163px;
+  display: flex; align-items: center; gap: 6px;
+  height: 30px; padding: 8px 12px;
+}
+.ltd-ribbon { position: absolute; inset: 0; width: 163px; height: 30px; }
+.ltd-lock { position: relative; flex: 0 0 auto; }
+.ltd-label {
+  position: relative;
+  font-size: 12px; font-weight: 700; line-height: normal;
+  letter-spacing: -0.2px; text-transform: uppercase; color: var(--white);
+  white-space: nowrap;
+}
+
+.ltd-head-right {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px;
+  padding: 0 12px;
+}
+.ltd-clock { flex: 0 0 auto; }
+.ltd-timer {
+  font-size: 12px; font-weight: 500; line-height: 18px;
+  letter-spacing: -0.1px; color: #2122b8; white-space: nowrap;
+}
+.ltd-timer b { font-weight: 700; }
+
+.ltd-body { display: flex; align-items: center; gap: 8px; padding: 12px; }
+.ltd--live .ltd-body { padding: 10px 12px; }
+
+.ltd-price { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ltd-price-head { display: flex; align-items: center; gap: 2px; }
+.ltd-price-label {
+  font-size: 14px; font-weight: 500; line-height: 20px;
+  letter-spacing: -0.1px; color: var(--ink-600);
+}
+.ltd-price-figures { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
+.ltd-now {
+  font-size: 16px; font-weight: 700; line-height: 22px;
+  letter-spacing: -0.15px; color: var(--ink-900);
+}
+.ltd-was {
+  font-size: 12px; font-weight: 400; line-height: 18px;
+  letter-spacing: -0.1px; color: var(--ink-500); text-decoration: line-through;
+}
+.ltd-off {
+  font-size: 14px; font-weight: 600; line-height: 18px;
+  letter-spacing: -0.14px; color: #189566;
+}
+.ltd-vat {
+  font-size: 14px; font-weight: 400; line-height: 18px;
+  letter-spacing: -0.14px; color: var(--ink-500);
+}
+
+/* Live promotes the deal price to H20 and puts everything on one baseline. */
+.ltd--live .ltd-price { gap: 0; }
+.ltd--live .ltd-price-figures { gap: 6px; }
+.ltd--live .ltd-now {
+  font-size: 20px; line-height: 28px; letter-spacing: -0.25px; color: #4f52d4;
+}
+.ltd--live .ltd-was { font-size: 14px; line-height: 20px; }
+
+.ltd-notify {
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 40px; padding: 10px 16px; /* Figma pins min and max height to 40 */
+  border: 1px solid var(--line-2); border-radius: 10px;
+  background: var(--white); color: var(--blue2);
+  font-family: inherit; font-size: 12px; font-weight: 600; line-height: 16px;
+  cursor: pointer; white-space: nowrap;
+}
+.ltd-notify:hover { background: var(--blue-tint); }
