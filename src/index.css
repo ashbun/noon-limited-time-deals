@@ -1,0 +1,84 @@
+/* ---------------------------------------------------------------------------
+   Global foundations shared by every page.
+
+   Page-specific rules live next to their page (e.g. src/pages/pdp/styles.css).
+   What belongs here: the brand font, the Field DS tokens, the reset, and the
+   phone frame every page renders inside.
+--------------------------------------------------------------------------- */
+
+/* Noontree — noon brand typeface (Field DS) */
+@font-face { font-family: "Noontree"; src: url("/fonts/Noontree-Light.woff2") format("woff2"); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: "Noontree"; src: url("/fonts/Noontree-Regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Noontree"; src: url("/fonts/Noontree-Medium.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "Noontree"; src: url("/fonts/Noontree-SemiBold.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: "Noontree"; src: url("/fonts/Noontree-Bold.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "Noontree"; src: url("/fonts/Noontree-ExtraBold.woff2") format("woff2"); font-weight: 800; font-style: normal; font-display: swap; }
+@font-face { font-family: "Noontree"; src: url("/fonts/Noontree-Black.woff2") format("woff2"); font-weight: 900; font-style: normal; font-display: swap; }
+
+:root {
+  /* Field DS tokens */
+  --blue: #0057ff;            /* Accent/700 */
+  --blue2: #0F61FF;           /* CTA blue (primary buttons) */
+  --blue-600: #0076ff;        /* Accent/600 */
+  --blue-tint: #eff7ff;       /* Accent/50 / Blue/50 */
+  --blue-100: #e1efff;        /* Accent/100 */
+  --ink: #101628;             /* Blue-Gray/1000 */
+  --ink-900: #1d2539;         /* Blue-Gray/900 */
+  --ink-800: #343d54;         /* Blue-Gray/800 */
+  --ink-700: #475067;         /* Blue-Gray/700 */
+  --ink-600: #666d85;         /* Blue-Gray/600 */
+  --ink-500: #989fb3;         /* Blue-Gray/500 */
+  --line: #eaecf0;            /* Blue-Gray/300 */
+  --line-2: #f2f3f7;          /* Blue-Gray/200 */
+  --line-3: #f3f5f7;          /* border/tertiary */
+  --surface: #f9f9fb;         /* Blue-Gray/100 */
+  --white: #fff;
+  --green: #02a31e;           /* Green/700 */
+  --emerald: #1f7a74;         /* Emerald/700 */
+  --emerald-800: #13645f;     /* Emerald/800 */
+  --yellow: #feee00;          /* noon Yellow */
+  --navy: #2122b8;            /* supermall solid */
+  --red: #e01e2b;
+  --radius: 12px;             /* Radius/12 */
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body {
+  font-family: "Noontree", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: #e9ebef;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+input, button, textarea, select { font-family: inherit; }
+
+/* Phone frame — every page renders inside this. On a real phone it goes
+   full-bleed; on desktop it's a centred 390px device mock. */
+.stage {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px 12px;
+}
+.phone {
+  position: relative;
+  width: 100%;
+  max-width: 390px;
+  height: min(812px, calc(100vh - 48px));
+  background: var(--surface);
+  border-radius: 22px;
+  box-shadow: 0 20px 60px rgba(20, 21, 26, 0.18);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+@media (max-width: 480px) {
+  .stage { padding: 0; min-height: 100dvh; min-height: var(--app-h, 100dvh); }
+  .phone {
+    max-width: none; width: 100vw;
+    height: 100dvh; height: var(--app-h, 100dvh);
+    border-radius: 0; box-shadow: none;
+  }
+}
