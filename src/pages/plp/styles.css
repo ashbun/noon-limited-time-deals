@@ -1,0 +1,186 @@
+/* =============================== PLP =============================== */
+/* Figma "PDP new features" 23044:77826; cards 23044:78434. */
+.plp { display: flex; flex-direction: column; height: 100%; background: var(--white); }
+
+/* Figma exports each glyph at its own vector size inside a square slot, and the
+   artwork carries preserveAspectRatio="none" — so the slot is the box and the
+   image keeps its intrinsic size, otherwise it stretches. */
+.plp-ico { flex: 0 0 auto; display: grid; place-items: center; }
+.plp-ico img { display: block; max-width: 100%; max-height: 100%; }
+.plp-ico--12 { width: 12px; height: 12px; }
+.plp-ico--16 { width: 16px; height: 16px; }
+.plp-ico--18 { width: 18px; height: 18px; }
+.plp-ico--20 { width: 20px; height: 20px; }
+.plp-ico--24 { width: 24px; height: 24px; }
+.plp-ico--star { width: 12px; height: 11.5px; }
+
+/* ------------------------------- Header ------------------------------- */
+.plp-header { flex: 0 0 auto; background: var(--white); }
+.plp-statusbar {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 42.5px; padding: 7px 16px 0 21px;
+}
+.plp-time { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; color: #000; }
+.plp-status-icons { display: inline-flex; align-items: center; gap: 5px; }
+
+.plp-searchrow { display: flex; align-items: center; padding: 5px 16px; height: 54px; }
+.plp-search {
+  flex: 1; min-width: 0; height: 44px;
+  display: flex; align-items: center; gap: 8px; padding: 0 12px 0 8px;
+  border: 1px solid rgba(64, 69, 83, 0.15); border-radius: 12px;
+  background: var(--white);
+}
+.plp-search-label {
+  flex: 1; min-width: 0;
+  font-size: 14px; font-weight: 500; line-height: 18px; color: var(--ink-800);
+}
+.plp-search-divider { flex: 0 0 1px; width: 1px; height: 24px; background: rgba(64, 69, 83, 0.15); }
+
+.plp-chips {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 12px 8px 16px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.plp-chips::-webkit-scrollbar { display: none; }
+.plp-chip {
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center; gap: 2px;
+  padding: 6px 8px; border-radius: 8px;
+  border: 1px solid #ebeaea; background: var(--white); color: #262a33;
+  font-family: inherit; font-size: 14px; font-weight: 500; line-height: 19.6px;
+  white-space: nowrap; cursor: pointer;
+}
+
+/* -------------------------------- Grid -------------------------------- */
+.plp-scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; background: var(--white); }
+.plp-scroll::-webkit-scrollbar { display: none; }
+.plp-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 16px 8px; padding: 8px 12px 16px;
+  align-items: start;
+}
+
+/* ----------------------------- Product card ----------------------------- */
+.pc {
+  display: flex; flex-direction: column;
+  border: 0.5px solid var(--line-2); border-radius: 12px;
+  overflow: hidden; background: var(--white); cursor: pointer;
+}
+.pc-media { position: relative; height: 227.33px; background: rgba(0, 40, 136, 0.03); }
+.pc-img {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  top: 0; height: 100%; aspect-ratio: 3 / 4;
+}
+.pc-img--cover { object-fit: cover; }
+.pc-img--contain { object-fit: contain; padding: 6.25% 0; }
+
+.pc-tag {
+  position: absolute; left: 0; top: 0; height: 20px;
+  display: flex; align-items: center; padding: 2px 6px;
+  border-bottom-right-radius: 10px; background: #0a4f4a;
+  font-size: 12px; font-weight: 600; line-height: 14px;
+  letter-spacing: -0.12px; color: var(--white); white-space: nowrap;
+}
+.pc-wish {
+  position: absolute; right: 8px; top: 8px;
+  display: grid; place-items: center; padding: 4px;
+  border: 0; border-radius: 9999px; background: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+}
+.pc-ad {
+  position: absolute; left: 8px; bottom: 8px;
+  padding: 2px 4px; border-radius: 4px; background: var(--line-2);
+  font-size: 10px; line-height: 11px; color: var(--ink-700);
+}
+.pc-dots {
+  position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 8px; border-radius: 9999px; background: rgba(14, 14, 14, 0.01);
+}
+.pc-dots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(14, 14, 14, 0.25); }
+.pc-dots i.on { background: #0e0e0e; }
+.pc-dots i.sm { width: 4px; height: 4px; }
+.pc-dots i.xs { width: 2px; height: 2px; }
+.pc-atc {
+  position: absolute; right: 8px; bottom: 8px;
+  display: grid; place-items: center; padding: 4px;
+  border: 1.2px solid var(--line-2); border-radius: 8px; background: var(--white);
+  cursor: pointer;
+}
+
+.pc-dealstrip {
+  flex: 0 0 20px; height: 20px;
+  display: flex; align-items: center; padding: 0 8px;
+  background: #fd8835;
+  font-size: 12px; font-weight: 500; line-height: 14px;
+  letter-spacing: -0.12px; color: var(--white);
+}
+
+.pc-body { display: flex; flex-direction: column; gap: 6px; padding: 8px; background: var(--white); }
+.pc-title {
+  margin: 0; height: 36px; overflow: hidden;
+  font-size: 14px; font-weight: 500; line-height: 18px;
+  letter-spacing: -0.14px; color: var(--ink-900);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.pc-rating {
+  align-self: flex-start;
+  display: inline-flex; align-items: center; gap: 2px;
+  height: 18px; padding: 2px 4px; border-radius: 4px; background: var(--surface);
+  font-size: 12px; line-height: 14px; letter-spacing: -0.12px; color: var(--ink);
+}
+.pc-rating b { font-weight: 600; }
+.pc-rating span { color: var(--ink-600); }
+
+/* Locked card keeps its normal price row above the tinted deal block. */
+.pc-price { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 2px; padding: 0 4px; }
+.pc-now {
+  font-size: 16px; font-weight: 700; line-height: 16px;
+  letter-spacing: 0.07px; color: var(--ink-900);
+}
+.pc-was {
+  font-size: 12px; font-weight: 400; line-height: 14px;
+  letter-spacing: -0.12px; color: var(--ink-500); text-decoration: line-through;
+}
+.pc-off {
+  font-size: 12px; font-weight: 600; line-height: 14px;
+  letter-spacing: -0.12px; color: var(--emerald-800);
+}
+
+/* The tinted deal block. Locked teases the deal price; activated carries the
+   whole price story, so the normal price row above is dropped. */
+.pc-deal {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 2px 4px 4px; border-radius: 8px;
+  background: linear-gradient(180deg, #fff8f0 0%, #fff3e5 100%);
+}
+.pc-deal--live { gap: 6px; padding: 6px 4px 4px; }
+.pc-deal-row { display: flex; align-items: center; gap: 4px; padding: 0 4px 0 2px; }
+.pc-deal--live .pc-deal-row { flex-wrap: wrap; align-items: flex-end; gap: 6px; }
+.pc-deal-price {
+  font-size: 13px; font-weight: 700; line-height: 20px;
+  letter-spacing: -0.1px; color: #e5641a;
+}
+.pc-deal--live .pc-deal-price { font-size: 16px; line-height: 16px; letter-spacing: 0.07px; }
+.pc-deal-label {
+  font-size: 10px; font-weight: 700; line-height: normal;
+  letter-spacing: -0.2px; text-transform: uppercase; color: #491604;
+}
+.pc-save {
+  font-size: 12px; font-weight: 600; line-height: 14px;
+  letter-spacing: -0.12px; color: #12a168;
+}
+.pc-before {
+  padding: 0 2px;
+  font-size: 12px; font-weight: 400; line-height: 14px;
+  letter-spacing: -0.12px; color: var(--ink-600);
+}
+.pc-before s { font-weight: 500; }
+
+.pc-timer {
+  display: flex; align-items: center; gap: 4px;
+  height: 20px; padding: 4px; border-radius: 4px; background: var(--white);
+  font-size: 12px; font-weight: 500; line-height: 18px;
+  letter-spacing: -0.1px; color: #491604; white-space: nowrap;
+}
+.pc-timer b { font-weight: 700; font-variant-numeric: tabular-nums; }

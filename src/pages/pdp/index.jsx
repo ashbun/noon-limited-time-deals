@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
 import LimitedTimeDeal, { DealSwitcher, formatCountdown, useLimitedTimeDeal } from './LimitedTimeDeal'
+import AppBottomNav from '../../components/AppBottomNav'
 import './styles.css'
 
 // Product page, ported from ashbun/noon-pdp-prototype and trimmed to the PDP
@@ -213,39 +214,6 @@ function BottomDeal({ deal, notified, onNotify }) {
         )}
       </div>
     </div>
-  )
-}
-
-const APP_NAV_ITEMS = [
-  { label: 'Home', icon: '/pdp/icons/bottom-nav/home.svg', selected: true },
-  { label: 'Categories', icon: '/pdp/icons/bottom-nav/categories.svg' },
-  { label: 'Deals', icon: '/pdp/icons/bottom-nav/deals.svg' },
-  { label: 'Account', icon: '/pdp/icons/bottom-nav/account.svg' },
-  { label: 'Cart', icon: '/pdp/icons/bottom-nav/cart.svg' },
-]
-
-function AppBottomNav() {
-  return (
-    <nav className="app-bottomnav" aria-label="Main navigation">
-      {APP_NAV_ITEMS.map(({ label, icon, selected }) => (
-        <button
-          className={`app-bottomnav-item${selected ? ' app-bottomnav-item--selected' : ''}`}
-          type="button"
-          aria-current={selected ? 'page' : undefined}
-          key={label}
-        >
-          <span className="app-bottomnav-indicator" aria-hidden="true">
-            {selected
-              ? <img src="/pdp/icons/bottom-nav/home-indicator.svg" alt="" width="43" height="4" />
-              : null}
-          </span>
-          <span className="app-bottomnav-content">
-            <img className="app-bottomnav-icon" src={icon} alt="" width="32" height="32" />
-            <span className="app-bottomnav-label">{label}</span>
-          </span>
-        </button>
-      ))}
-    </nav>
   )
 }
 
