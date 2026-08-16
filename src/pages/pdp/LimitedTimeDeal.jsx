@@ -180,69 +180,75 @@ function AnimatedDealPrice({ price, dh: Dh }) {
   )
 }
 
-export default function LimitedTimeDeal({ deal, price, upcomingWas, liveWas, off, dh: Dh, notified, onNotify }) {
+export default function LimitedTimeDeal({ deal, price, regular, upcomingWas, liveWas, off, save, dh: Dh, notified, onNotify }) {
   const [widgetRef, inView] = useViewportPresence()
-  const live = deal.state === 'live'
   if (deal.state === 'ended') return null
-  const was = live ? liveWas : upcomingWas
+  const live = deal.state === 'live'
 
-  const timer = (
-    <>
-      <span className="ltd-ico ltd-ico--14">
-        <img src={live ? '/pdp/icons/deal-timelapse.svg' : '/pdp/icons/deal-lock-purple.svg'} alt="" />
-      </span>
-      <span className="ltd-timer">
-        {live ? 'Ending in' : 'Unlocks in'}{' '}
-        <b>{formatCountdown(deal.remaining)}</b>
-      </span>
-    </>
-  )
-
-  return (
-    <div ref={widgetRef} className={`ltd${live ? ' ltd--live' : ''}${inView ? ' ltd--in-view' : ''}`}>
-      <div className="ltd-head">
-        <div className="ltd-head-left">
-          <img className="ltd-ribbon" src="/pdp/icons/deal-ribbon.svg" alt="" width="164" height="30" />
-          <span className="ltd-shimmer" aria-hidden="true" />
-          <span className="ltd-head-left-inner">
-            <span className="ltd-ico ltd-ico--14">
-              <img src="/pdp/icons/deal-bolt.svg" alt="" />
+  // Live keeps the ribbon header — that is what the shimmer runs along, and the
+  // deal price under it is what the digit reel spins into.
+  if (live) {
+    return (
+      <div ref={widgetRef} className={`ltd ltd--live${inView ? ' ltd--in-view' : ''}`}>
+        <div className="ltd-head">
+          <div className="ltd-head-left">
+            <img className="ltd-ribbon" src="/pdp/icons/o-ribbon-active.svg" alt="" width="164" height="28" />
+            <span className="ltd-shimmer" aria-hidden="true" />
+            <span className="ltd-head-left-inner">
+              <span className="ltd-ico ltd-ico--14"><img src="/pdp/icons/o-bolt.svg" alt="" /></span>
+              <span className="ltd-label">Limited time deal</span>
             </span>
-            <span className="ltd-label">Limited time deal</span>
-          </span>
+          </div>
+          <div className="ltd-head-right">
+            <span className="ltd-ico ltd-ico--14"><img src="/pdp/icons/o-timelapse.svg" alt="" /></span>
+            <span className="ltd-timer">Ending in <b>{formatCountdown(deal.remaining)}</b></span>
+          </div>
         </div>
-        <div className="ltd-head-right">{timer}</div>
+
+        <div className="ltd-body">
+          <div className="ltd-price-row">
+            <AnimatedDealPrice price={price} dh={Dh} />
+            <span className="ltd-save">Save <Dh />{save}</span>
+          </div>
+          <div className="ltd-subrow">
+            <span className="ltd-before"><s><Dh />{liveWas}</s> Before deal</span>
+            <span className="ltd-vat">(incl. of VAT)</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Locked splits into two columns: today's price on the left, the deal being
+  // held back on the right. No ribbon here, so no shimmer — the design drops it.
+  return (
+    <div ref={widgetRef} className={`ltd ltd--locked${inView ? ' ltd--in-view' : ''}`}>
+      <div className="ltd-col ltd-col--regular">
+        <span className="ltd-reg-price"><Dh />{regular}</span>
+        <span className="ltd-reg-sub">
+          <s><Dh />{upcomingWas}</s>
+          <b>{off}% OFF</b>
+        </span>
+        <span className="ltd-vat">(incl. of VAT)</span>
       </div>
 
-      <div className="ltd-body">
-        {/* The two states split the price differently: live gives it its own
-            headline row, upcoming keeps it inline after the label. */}
-        <div className="ltd-price">
-          <span className="ltd-price-head">
-            <span className="ltd-price-label">Deal price{live ? '' : ':'}</span>
-            {!live && <span className="ltd-now"><Dh />{price}</span>}
-          </span>
-          <span className="ltd-price-figures">
-            {live && <AnimatedDealPrice price={price} dh={Dh} />}
-            <span className="ltd-was"><Dh />{was}</span>
-            <span className="ltd-off">{off}% OFF</span>
-            {live && <span className="ltd-vat">(incl. of VAT)</span>}
-          </span>
-        </div>
-        {!live && (
-          <button
-            className={`ltd-notify${notified ? ' ltd-notify--notified' : ''}`}
-            type="button"
-            data-testid="widget-notify"
-            disabled={notified}
-            onClick={onNotify}
-          >
-            <span className="ltd-ico ltd-ico--20">
-              <img src={notified ? '/pdp/icons/deal-bell-notified.svg' : '/pdp/icons/deal-bell.svg'} alt="" />
-            </span>
-            {notified ? 'Notified' : 'Notify me'}
-          </button>
-        )}
+      <div className="ltd-col ltd-col--deal">
+        <span className="ltd-deal-price"><Dh />{price}</span>
+        <span className="ltd-save">Save extra <Dh />{save}</span>
+        <span className="ltd-unlock">
+          <span className="ltd-ico ltd-ico--14"><img src="/pdp/icons/o-lock-white.svg" alt="" /></span>
+          <span className="ltd-unlock-text">Unlocks in <b>{formatCountdown(deal.remaining)}</b></span>
+        </span>
+        <button
+          className={`ltd-bell${notified ? ' ltd-bell--notified' : ''}`}
+          type="button"
+          data-testid="widget-notify"
+          aria-label={notified ? 'Notification set' : 'Notify me'}
+          disabled={notified}
+          onClick={onNotify}
+        >
+          <span className="ltd-ico ltd-ico--19"><img src="/pdp/icons/o-bell.svg" alt="" /></span>
+        </button>
       </div>
     </div>
   )

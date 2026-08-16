@@ -100,15 +100,14 @@
   position: relative; z-index: 0; flex: 0 0 auto;
   overflow: hidden;
 }
+/* Sticky deal bar — Figma 23046:80157 (live) / 23046:78553 (locked). */
 .bottom-deal {
   flex: 0 0 32px; height: 32px;
-  display: flex; align-items: stretch;
-  overflow: hidden; background: #f6f6fe;
+  display: flex; align-items: center; justify-content: space-between;
+  overflow: hidden; background: #fff1e0;
 }
-.bottom-deal-left {
-  position: relative; flex: 0 0 243px; width: 243px; height: 32px;
-}
-.bottom-deal--live .bottom-deal-left { flex-basis: 50%; width: 50%; }
+.bottom-deal-left { position: relative; flex: 0 0 243px; width: 243px; height: 32px; }
+.bottom-deal--live .bottom-deal-left { flex-basis: 188px; width: 188px; }
 .bottom-deal-ribbon { position: absolute; inset: 0; width: 100%; height: 100%; }
 .bottom-deal-left-content {
   position: relative; z-index: 1;
@@ -121,33 +120,24 @@
 }
 .bottom-deal-icon--18 { flex-basis: 18px; width: 18px; height: 18px; }
 .bottom-deal-icon img { display: block; max-width: 100%; max-height: 100%; }
+/* Live shows the uppercase ribbon label; locked carries the countdown instead. */
 .bottom-deal-label {
   font-size: 14px; font-weight: 500; line-height: 20px;
   letter-spacing: -0.1px; white-space: nowrap;
 }
-.bottom-deal-label b { font-weight: 700; font-variant-numeric: tabular-nums; }
 .bottom-deal--live .bottom-deal-label {
   font-size: 12px; font-weight: 700; line-height: normal;
   letter-spacing: -0.2px; text-transform: uppercase;
 }
+.bottom-deal-label b { font-weight: 700; font-variant-numeric: tabular-nums; }
 .bottom-deal-right {
   flex: 1 1 auto; min-width: 0;
   display: flex; align-items: center; justify-content: center;
 }
-.bottom-deal--live .bottom-deal-right { flex-basis: 50%; }
-.bottom-deal-notify {
-  width: 132px; height: 32px; padding: 0 12px;
-  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
-  border: 0; border-radius: 0; background: transparent; color: #4f52d4;
-  font-family: inherit; font-size: 12px; font-weight: 700; line-height: 18px;
-  letter-spacing: -0.1px; text-transform: uppercase;
-  white-space: nowrap; cursor: pointer;
-}
-.bottom-deal-notify:disabled { opacity: 1; cursor: not-allowed; }
-.bottom-deal-notify--notified { color: #757adb; }
+.bottom-deal--live .bottom-deal-right { padding-right: 12px; }
 .bottom-deal-ending {
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  color: #4f52d4; font-size: 14px; font-weight: 500; line-height: 20px;
+  display: inline-flex; align-items: center; gap: 6px;
+  color: #491604; font-size: 14px; font-weight: 500; line-height: 20px;
   letter-spacing: -0.1px; white-space: nowrap;
 }
 .bottom-deal-ending b {
@@ -155,6 +145,15 @@
   font-weight: 700; font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum' 1;
 }
+.bottom-deal-notify {
+  flex: 0 0 132px; width: 132px; height: 100%;
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+  padding: 0 12px; border: 0; background: none; color: #e5641a;
+  font-family: inherit; font-size: 12px; font-weight: 700; line-height: 18px;
+  letter-spacing: -0.1px; text-transform: uppercase;
+  white-space: nowrap; cursor: pointer;
+}
+.bottom-deal-notify--notified { opacity: .65; cursor: default; }
 .pdp-bottomnav-row {
   position: relative; z-index: 1;
   display: flex; align-items: center; gap: 8px; height: 72px; padding: 12px;
@@ -454,36 +453,25 @@
 /* --------------------------- Limited time deal --------------------------- */
 /* Figma "PDP new features" 22627:19400. At the 375px design viewport the card
    is 327px wide: a fixed 164px ribbon and a 163px countdown section. */
-.ltd {
-  position: relative;
-  border-radius: 16px;
-  background: var(--white);
-  overflow: hidden;
-}
+/* Limited-time deal — Figma 23043:71634 (live) / 22998:36601 (locked). */
+.ltd { position: relative; border-radius: 12px; background: var(--white); overflow: hidden; }
 .ltd::after {
-  content: '';
-  position: absolute; inset: 0; z-index: 3;
-  border: 1px solid #f2f3f7;
-  border-radius: inherit;
-  pointer-events: none;
+  content: ''; position: absolute; inset: 0; z-index: 3;
+  border: 1px solid #fff1e0; border-radius: inherit; pointer-events: none;
 }
-.ltd--live::after { border-color: #f6f6fe; }
 
-.ltd-head { position: relative; display: flex; align-items: center; height: 30px; overflow: hidden; background: #f6f6fe; }
-.ltd--live .ltd-head { background: var(--white); }
-
-.ltd-head-left {
-  position: relative;
-  flex: 0 0 164px;
-  width: 164px; height: 30px;
-  overflow: hidden;
+/* Live keeps the ribbon header the shimmer sweeps along. */
+.ltd-head {
+  position: relative; display: flex; align-items: center;
+  height: 28px; overflow: hidden; background: #fff1e0;
 }
+.ltd-head-left { position: relative; flex: 0 0 164px; width: 164px; height: 28px; overflow: hidden; }
 .ltd-ribbon { position: absolute; inset: 0; width: 100%; height: 100%; }
 .ltd-shimmer {
   position: absolute; inset: 0; z-index: 1;
   overflow: hidden; pointer-events: none;
-  -webkit-mask: url('/pdp/icons/deal-ribbon.svg') center / 100% 100% no-repeat;
-  mask: url('/pdp/icons/deal-ribbon.svg') center / 100% 100% no-repeat;
+  -webkit-mask: url('/pdp/icons/o-ribbon-active.svg') center / 100% 100% no-repeat;
+  mask: url('/pdp/icons/o-ribbon-active.svg') center / 100% 100% no-repeat;
 }
 .ltd-shimmer::after {
   content: '';
@@ -505,85 +493,97 @@
   34.7826%, 100% { transform: translateX(245px) skewX(-18deg); opacity: 0; }
 }
 .ltd-head-left-inner {
-  position: absolute; left: 10px; top: 8px; z-index: 2;
-  display: flex; align-items: center; gap: 6px;
-  height: 14px;
+  position: absolute; left: 10px; top: 7px; z-index: 2;
+  display: flex; align-items: center; gap: 6px; height: 14px;
 }
-/* Figma exports each glyph at its own vector size, inset inside a square slot
-   (a 20px slot holds a 12.92x14.79 bell, a 14px slot an 10.5x12.25 bolt, and so
-   on). The artwork carries preserveAspectRatio="none", so forcing the image to
-   the slot size both oversizes and distorts it — the slot is the box, the image
-   keeps its intrinsic size and centres inside. */
 .ltd-ico { flex: 0 0 auto; display: grid; place-items: center; }
-.ltd-ico--14 { width: 14px; height: 14px; }
-.ltd-ico--20 { width: 20px; height: 20px; }
 .ltd-ico img { display: block; max-width: 100%; max-height: 100%; }
+.ltd-ico--14 { width: 14px; height: 14px; }
+.ltd-ico--19 { width: 18.67px; height: 18.67px; }
 .ltd-label {
-  position: relative;
-  font-size: 12px; font-weight: 700; line-height: normal;
-  letter-spacing: -0.2px; text-transform: uppercase; color: var(--white);
-  white-space: nowrap;
+  font-size: 12px; font-weight: 700; line-height: normal; letter-spacing: -0.2px;
+  text-transform: uppercase; color: var(--white); white-space: nowrap;
 }
-
 .ltd-head-right {
-  flex: 1 1 163px; min-width: 0; height: 30px;
+  flex: 1 1 auto; min-width: 0;
   display: flex; align-items: center; justify-content: center; gap: 4px;
   padding: 0 16px 0 12px;
 }
-.ltd--live .ltd-head-right { padding-left: 8px; }
 .ltd-timer {
   font-size: 13px; font-weight: 500; line-height: 20px;
-  letter-spacing: -0.1px; color: #3536da; white-space: nowrap;
+  letter-spacing: -0.1px; color: #491604; white-space: nowrap;
 }
-.ltd-timer b {
-  display: inline-block; width: 62px;
-  font-weight: 700; font-variant-numeric: tabular-nums;
-  font-feature-settings: 'tnum' 1;
-}
+.ltd-timer b { font-weight: 700; font-variant-numeric: tabular-nums; }
 
 .ltd-body {
-  display: flex; align-items: center; gap: 8px;
-  min-height: 67px; padding: 12px;
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 10px 12px 8px;
+  border: 1px solid #fff1e0; border-top: 0; border-radius: 0 0 12px 12px;
 }
-.ltd--live .ltd-body {
-  min-height: 68px; padding: 10px 12px;
-  background: linear-gradient(-74.4447deg, #f0f0ff 1.8326%, #fcfcff 98.238%);
+.ltd-price-row { display: flex; align-items: center; gap: 6px; }
+.ltd-save {
+  font-size: 16px; font-weight: 600; line-height: 20px;
+  letter-spacing: -0.16px; color: #12a168; white-space: nowrap;
 }
-
-.ltd-price { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.ltd-price-head { display: flex; align-items: center; gap: 2px; }
-.ltd-price-label {
-  font-size: 14px; font-weight: 500; line-height: 20px;
-  letter-spacing: -0.1px; color: var(--ink-600);
-}
-.ltd-price-figures {
-  display: flex; align-items: baseline; gap: 4px;
-  padding-bottom: 1px; white-space: nowrap;
-}
-.ltd-now {
-  font-size: 16px; font-weight: 700; line-height: 22px;
-  letter-spacing: -0.15px; color: var(--ink-900);
-}
-.ltd-was {
-  font-size: 12px; font-weight: 400; line-height: 18px;
-  letter-spacing: -0.1px; color: var(--ink-500); text-decoration: line-through;
-}
-.ltd-off {
-  font-size: 14px; font-weight: 600; line-height: 18px;
-  letter-spacing: -0.14px; color: #189566;
-}
-.ltd:not(.ltd--live) .ltd-off { font-size: 12px; }
-.ltd-vat {
+.ltd-subrow { display: flex; align-items: flex-start; gap: 3px; flex-wrap: wrap; }
+.ltd-before, .ltd-vat {
   font-size: 14px; font-weight: 400; line-height: 18px;
-  letter-spacing: -0.14px; color: var(--ink-500);
+  letter-spacing: -0.14px; color: var(--ink-600); white-space: nowrap;
 }
+.ltd-before s { font-weight: 600; }
 
-/* Live promotes the deal price to H20 and puts everything on one baseline. */
-.ltd--live .ltd-price { gap: 0; }
-.ltd--live .ltd-price-figures { gap: 6px; padding-bottom: 0; }
-.ltd--live .ltd-now {
-  font-size: 20px; line-height: 28px; letter-spacing: -0.25px; color: #4f52d4;
+/* Locked drops the ribbon for a two-column split: today's price beside the
+   deal being held back. No ribbon here, so no shimmer. */
+.ltd--locked { display: flex; align-items: stretch; }
+.ltd-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
+.ltd-col--regular { gap: 4px; padding: 12px 12px 8px; }
+.ltd-reg-price {
+  font-size: 18px; font-weight: 700; line-height: 24px;
+  letter-spacing: -0.18px; color: var(--ink-900);
 }
+.ltd-reg-sub { display: flex; align-items: flex-end; gap: 4px; }
+.ltd-reg-sub s {
+  font-size: 14px; font-weight: 500; line-height: 20px;
+  letter-spacing: -0.1px; color: var(--ink-500);
+}
+.ltd-reg-sub b {
+  font-size: 14px; font-weight: 600; line-height: 20px;
+  letter-spacing: -0.1px; color: #12a168;
+}
+.ltd--locked .ltd-vat { font-size: 13px; line-height: 20px; letter-spacing: -0.1px; }
+
+.ltd-col--deal {
+  position: relative; gap: 6px; padding: 12px 12px 10px;
+  background: linear-gradient(180deg, #fff7ed 0%, #fffbf6 100%);
+}
+.ltd-deal-price {
+  font-size: 18px; font-weight: 700; line-height: 24px;
+  letter-spacing: -0.18px; color: #e5641a;
+}
+.ltd--locked .ltd-save { font-size: 14px; line-height: 20px; letter-spacing: -0.1px; }
+.ltd-unlock {
+  align-self: flex-start;
+  display: inline-flex; align-items: center; gap: 4px;
+  height: 22px; padding: 4px; border-radius: 4px;
+  background: linear-gradient(90deg, #f78747 0%, #f27833 100%);
+  color: var(--white);
+}
+.ltd-unlock-text {
+  font-size: 12px; font-weight: 500; line-height: 14px;
+  letter-spacing: -0.12px; white-space: nowrap;
+}
+.ltd-unlock-text b { font-weight: 700; font-variant-numeric: tabular-nums; }
+.ltd-bell {
+  position: absolute; right: 12px; top: 8px;
+  width: 28px; height: 28px; padding: 0;
+  display: grid; place-items: center;
+  border: 0; border-radius: 9999px; background: var(--white); cursor: pointer;
+}
+.ltd-bell--notified { opacity: .55; cursor: default; }
+
+/* Reel geometry (28px rows) is deliberately untouched — only the colour moves
+   to orange, so the slot animation keeps working exactly as before. */
+.ltd-now { font-size: 20px; font-weight: 700; line-height: 28px; letter-spacing: -0.2px; color: #e5641a; }
 .ltd-price-slot {
   position: relative;
   display: inline-block; height: 28px;

@@ -159,29 +159,27 @@ function PDP() {
 function BottomDeal({ deal, notified, onNotify }) {
   const live = deal.state === 'live'
 
+  // Sticky counterpart of the inline widget — same orange ribbon, compacted to
+  // 32px. Live puts the countdown on the right; locked carries it in the ribbon
+  // itself and gives the right side to Notify me.
   return (
     <div className={`bottom-deal${live ? ' bottom-deal--live' : ''}`}>
       <div className="bottom-deal-left">
         <img
           className="bottom-deal-ribbon"
           src={live
-            ? '/pdp/icons/deal-sticky-active-ribbon.svg'
-            : '/pdp/icons/deal-sticky-inactive-ribbon.svg'}
+            ? '/pdp/icons/o-sticky-ribbon-active.svg'
+            : '/pdp/icons/o-sticky-ribbon-locked.svg'}
           alt=""
         />
         <span className="bottom-deal-left-content">
           <span className="bottom-deal-icon">
-            <img
-              src={live ? '/pdp/icons/deal-sticky-bolt.svg' : '/pdp/icons/deal-sticky-lock.svg'}
-              alt=""
-            />
+            <img src={live ? '/pdp/icons/o-sticky-bolt.svg' : '/pdp/icons/o-sticky-lock.svg'} alt="" />
           </span>
           <span className="bottom-deal-label">
-            {live ? (
-              'Limited time deal'
-            ) : (
-              <>Deal unlocks in <b>{formatCountdown(deal.remaining)}</b></>
-            )}
+            {live
+              ? 'Limited time deal'
+              : <>Deal unlocks in <b>{formatCountdown(deal.remaining)}</b></>}
           </span>
         </span>
       </div>
@@ -190,7 +188,7 @@ function BottomDeal({ deal, notified, onNotify }) {
         {live ? (
           <span className="bottom-deal-ending">
             <span className="bottom-deal-icon">
-              <img src="/pdp/icons/deal-sticky-timelapse.svg" alt="" />
+              <img src="/pdp/icons/o-sticky-timelapse.svg" alt="" />
             </span>
             <span>Ending in <b>{formatCountdown(deal.remaining)}</b></span>
           </span>
@@ -198,17 +196,12 @@ function BottomDeal({ deal, notified, onNotify }) {
           <button
             className={`bottom-deal-notify${notified ? ' bottom-deal-notify--notified' : ''}`}
             type="button"
-            data-testid="bottom-strip-notify"
+            data-testid="sticky-notify"
             disabled={notified}
             onClick={onNotify}
           >
             <span className="bottom-deal-icon bottom-deal-icon--18">
-              <img
-                src={notified
-                  ? '/pdp/icons/deal-sticky-notified.svg'
-                  : '/pdp/icons/deal-sticky-bell.svg'}
-                alt=""
-              />
+              <img src="/pdp/icons/o-sticky-bell.svg" alt="" />
             </span>
             {notified ? 'Notified' : 'Notify me'}
           </button>
@@ -344,7 +337,7 @@ function InfoDot() {
 
 // The two reference states use different comparison prices while sharing the
 // same deal price and discount.
-const DEAL = { price: '300.99', upcomingWas: '500.99', liveWas: 899, off: 60 }
+const DEAL = { price: '300.75', regular: '349.75', upcomingWas: 899, liveWas: 349, off: 47, save: 49 }
 
 function UnitDetails() {
   return (
