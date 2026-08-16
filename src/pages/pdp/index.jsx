@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
 import LimitedTimeDeal, { DealSwitcher, formatCountdown, useLimitedTimeDeal } from './LimitedTimeDeal'
 import AppBottomNav from '../../components/AppBottomNav'
@@ -261,9 +262,21 @@ function BottomNav({ deal, showDeal, notified, onNotify }) {
 /* Shared top navigation. state 1: back + search(icon) + wishlist + share.
    state 2: back + search(pill) + share. */
 function TopNav({ state = 1, onBack }) {
+  const navigate = useNavigate()
+
+  // Pop history when we arrived from the listing, rather than pushing another
+  // entry, so the browser's own back button stays coherent. On a deep link into
+  // the PDP there is nothing to pop — going back would leave the app — so land
+  // on the listing instead. (The listing returns scrolled to the top either
+  // way; its scroll lives in an inner container the router doesn't restore.)
+  const goBack = onBack ?? (() => {
+    if (window.history.state?.idx > 0) navigate(-1)
+    else navigate('/plp')
+  })
+
   return (
     <div className="tb-nav">
-      <button className="tb-btn" onClick={onBack} aria-label="Back">
+      <button className="tb-btn" onClick={goBack} aria-label="Back">
         <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden><path fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6"/></svg>
       </button>
       <DealSwitcher />
