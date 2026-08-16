@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AppBottomNav from '../../components/AppBottomNav'
 import { formatCountdown, useLimitedTimeDeal } from '../pdp/LimitedTimeDeal'
@@ -64,13 +65,46 @@ const CHIPS = [
   { label: 'Accessories' },
 ]
 
+const SCROLL_KEY = 'plp:scroll'
+
+// The listing scrolls inside its own container so the header and tab bar stay
+// put, and the router only restores window scroll — so coming back from a
+// product would drop you at the top. Stash the position as it changes and put
+// it back on mount. sessionStorage rather than a module variable so it also
+// survives a reload.
+function useScrollRestoration(ref) {
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return undefined
+
+    const saved = Number(sessionStorage.getItem(SCROLL_KEY))
+    // Cards are a fixed height, so the grid is already tall enough to scroll
+    // here — no need to wait on product images loading.
+    if (saved > 0) el.scrollTop = saved
+
+    let frame = 0
+    const onScroll = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => sessionStorage.setItem(SCROLL_KEY, String(el.scrollTop)))
+    }
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      cancelAnimationFrame(frame)
+      el.removeEventListener('scroll', onScroll)
+    }
+  }, [ref])
+}
+
 export default function PlpPage() {
+  const scrollRef = useRef(null)
+  useScrollRestoration(scrollRef)
+
   return (
     <div className="stage">
       <div className="phone">
         <div className="plp">
           <PlpHeader />
-          <div className="plp-scroll">
+          <div className="plp-scroll" ref={scrollRef}>
             <div className="plp-grid">
               {GRID.map((product) => <ProductCard key={product.id} product={product} />)}
             </div>
