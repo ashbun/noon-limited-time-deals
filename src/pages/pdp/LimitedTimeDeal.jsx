@@ -124,15 +124,18 @@ function useViewportPresence() {
 const INITIAL_DEAL_PRICE = '349.99'
 
 function buildDigitReel(start, end) {
-  const digits = [start]
-  let current = Number(start)
+  const startDigit = Number(start)
+  const endDigit = Number(end)
+  // Matching digits that are animated elsewhere in the price still travel
+  // through one complete reel so every animated column has visible movement.
+  const transitions = startDigit === endDigit
+    ? 10
+    : (startDigit - endDigit + 10) % 10
 
-  do {
-    current = (current + 9) % 10
-    digits.push(String(current))
-  } while (String(current) !== end)
-
-  return digits
+  return Array.from(
+    { length: transitions + 1 },
+    (_, step) => String((startDigit - step + 10) % 10),
+  )
 }
 
 function AnimatedDealPrice({ price, dh: Dh }) {
@@ -149,12 +152,17 @@ function AnimatedDealPrice({ price, dh: Dh }) {
             return <span className="ltd-price-decimal" key={`${end}-${index}`}>{end}</span>
           }
 
-          reelIndex += 1
           const start = INITIAL_DEAL_PRICE[index] ?? end
+          const isUnchangedLeadingDigit = index === 0 && start === end
+          if (isUnchangedLeadingDigit) {
+            return <span className="ltd-price-static-digit" key={`${index}-${end}`}>{end}</span>
+          }
+
+          reelIndex += 1
           const digits = buildDigitReel(start, end)
           const transitions = digits.length - 1
           const style = {
-            '--slot-delay': `${1000 + reelIndex * 45}ms`,
+            '--slot-delay': `${600 + reelIndex * 45}ms`,
             '--slot-duration': `${500 + transitions * 75}ms`,
             '--slot-distance': `${transitions * -28}px`,
           }

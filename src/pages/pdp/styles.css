@@ -175,8 +175,37 @@
 .add-cart { background: var(--blue2); border: 1px solid var(--blue2); color: #fff; border-radius: 12px; }
 .buy-now:hover { background: var(--blue-tint); }
 .add-cart:hover { filter: brightness(1.05); }
+.app-bottomnav {
+  position: relative; z-index: 1;
+  flex: 0 0 63px; height: 63px; padding: 0 16px;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  border-top: 1px solid #f2f3f7;
+  background: var(--white);
+}
+.app-bottomnav-item {
+  flex: 0 0 67px; width: 67px; height: 63px; padding: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  border: 0; background: var(--white); color: #475067;
+  font-family: inherit; cursor: pointer;
+}
+.app-bottomnav-indicator {
+  flex: 0 0 4px; width: 56px; height: 4px;
+  display: flex; justify-content: center;
+}
+.app-bottomnav-indicator img { display: block; width: 43px; height: 4px; }
+.app-bottomnav-content {
+  flex: 1 0 0; min-height: 0; width: 67px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.app-bottomnav-icon { display: block; width: 32px; height: 32px; }
+.app-bottomnav-label {
+  font-size: 12px; font-weight: 500; line-height: 20.018px;
+  letter-spacing: -0.1601px; white-space: nowrap;
+}
+.app-bottomnav-item--selected { color: #1155cb; }
+.app-bottomnav-item--selected .app-bottomnav-label { font-weight: 700; }
 .home-bar { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; padding: 12px 0 8px; background: var(--white); }
-.home-bar span { width: 124px; height: 5px; border-radius: 8px; background: #0e0e0e; }
+.home-bar span { width: 124px; height: 5px; border-radius: 8px; background: #1d2539; }
 
 /* Figma "Touch points" 22629:111193. Floats independently of the PDP nav. */
 .touch-points {
@@ -612,7 +641,8 @@
   display: block; flex: 0 0 28px; height: 28px;
   line-height: 28px; white-space: nowrap;
 }
-.ltd-price-decimal { display: inline-block; height: 28px; line-height: 28px; }
+.ltd-price-decimal,
+.ltd-price-static-digit { display: inline-block; height: 28px; line-height: 28px; }
 .ltd--in-view .ltd-price-digit-track {
   animation: ltd-price-digit-roll var(--slot-duration) cubic-bezier(.22, 1, .36, 1) var(--slot-delay) both;
 }

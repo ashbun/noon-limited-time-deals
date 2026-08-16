@@ -216,6 +216,39 @@ function BottomDeal({ deal, notified, onNotify }) {
   )
 }
 
+const APP_NAV_ITEMS = [
+  { label: 'Home', icon: '/pdp/icons/bottom-nav/home.svg', selected: true },
+  { label: 'Categories', icon: '/pdp/icons/bottom-nav/categories.svg' },
+  { label: 'Deals', icon: '/pdp/icons/bottom-nav/deals.svg' },
+  { label: 'Account', icon: '/pdp/icons/bottom-nav/account.svg' },
+  { label: 'Cart', icon: '/pdp/icons/bottom-nav/cart.svg' },
+]
+
+function AppBottomNav() {
+  return (
+    <nav className="app-bottomnav" aria-label="Main navigation">
+      {APP_NAV_ITEMS.map(({ label, icon, selected }) => (
+        <button
+          className={`app-bottomnav-item${selected ? ' app-bottomnav-item--selected' : ''}`}
+          type="button"
+          aria-current={selected ? 'page' : undefined}
+          key={label}
+        >
+          <span className="app-bottomnav-indicator" aria-hidden="true">
+            {selected
+              ? <img src="/pdp/icons/bottom-nav/home-indicator.svg" alt="" width="43" height="4" />
+              : null}
+          </span>
+          <span className="app-bottomnav-content">
+            <img className="app-bottomnav-icon" src={icon} alt="" width="32" height="32" />
+            <span className="app-bottomnav-label">{label}</span>
+          </span>
+        </button>
+      ))}
+    </nav>
+  )
+}
+
 function BottomNav({ deal, showDeal, notified, onNotify }) {
   const reduceMotion = useReducedMotion()
 
@@ -250,6 +283,7 @@ function BottomNav({ deal, showDeal, notified, onNotify }) {
         <button className="cta buy-now">Buy now</button>
         <button className="cta add-cart">Add to cart</button>
       </div>
+      <AppBottomNav />
       <div className="home-bar"><span /></div>
     </div>
   )
