@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
+import { getProductVisual } from '../../data/productVisuals'
 import LimitedTimeDeal, { DealSwitcher, formatCountdown, useLimitedTimeDeal } from './LimitedTimeDeal'
 import AppBottomNav from '../../components/AppBottomNav'
 import './styles.css'
@@ -65,7 +66,9 @@ function PDP() {
   // Scroll-linked gallery: the product image shrinks as the page scrolls,
   // so the content sliding over the pinned gallery feels more interactive.
   const scrollRef = useRef(null)
+  const [searchParams] = useSearchParams()
   const deal = useLimitedTimeDeal()
+  const productVisual = getProductVisual(searchParams.get('product'))
   const [showBottomDeal, setShowBottomDeal] = useState(false)
   const [notified, setNotified] = useState(false)
   const [showNotifyToast, setShowNotifyToast] = useState(false)
@@ -130,7 +133,7 @@ function PDP() {
       </AnimatePresence>
       <StatusBar />
       <div className="pdp-scroll" ref={scrollRef}>
-        <Gallery imgScale={imgScale} imgOpacity={imgOpacity} />
+        <Gallery imgScale={imgScale} imgOpacity={imgOpacity} productVisual={productVisual} />
         <div className="pdp-sections">
           <MainInfo deal={deal} notified={notified} onNotify={requestDealNotification} />
           <Delivery />
@@ -314,14 +317,14 @@ function StatusBar() {
 }
 
 /* --------------------------------- Gallery --------------------------------- */
-function Gallery({ imgScale, imgOpacity }) {
+function Gallery({ imgScale, imgOpacity, productVisual }) {
   return (
     <div className="gallery">
       <motion.img
-        className="gallery-img"
+        className={`gallery-img${productVisual.edgeToEdge ? ' gallery-img--edge-to-edge' : ''}`}
         style={{ scale: imgScale, opacity: imgOpacity }}
-        src="/pdp/anker-charger.png"
-        alt="Anker 737 GaN USB-C charger"
+        src={productVisual.image}
+        alt={productVisual.alt}
       />
       <div className="gallery-dots">
         <span className="dot on" /><span className="dot" /><span className="dot" />

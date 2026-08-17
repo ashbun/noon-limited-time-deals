@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AppBottomNav from '../../components/AppBottomNav'
+import { PRODUCT_VISUALS } from '../../data/productVisuals'
 import { formatCountdown, useLimitedTimeDeal } from '../pdp/LimitedTimeDeal'
 import './styles.css'
 
@@ -24,9 +25,10 @@ function Dh() {
 const PRODUCTS = [
   {
     id: 'airpods-locked',
+    productKey: 'shoerack',
     deal: 'locked',
-    img: '/plp/product-shoerack.png',
-    fit: 'cover',
+    img: PRODUCT_VISUALS.shoerack.image,
+    fit: PRODUCT_VISUALS.shoerack.fit,
     title: 'Apple Airpods Pro 2 Wireless Earbuds',
     rating: '4.3',
     reviews: '(128)',
@@ -39,9 +41,10 @@ const PRODUCTS = [
   },
   {
     id: 'airpods-live',
+    productKey: 'airpods',
     deal: 'activated',
-    img: '/plp/product-airpods.png',
-    fit: 'contain',
+    img: PRODUCT_VISUALS.airpods.image,
+    fit: PRODUCT_VISUALS.airpods.fit,
     title: 'Apple Airpods Pro 2 Wireless Earbuds',
     rating: '4.3',
     reviews: '(128)',
@@ -157,7 +160,13 @@ function ProductCard({ product }) {
   const activated = product.deal === 'activated'
   // The card's own state decides which PDP you land on, so a locked card opens
   // the locked PDP even while another card on screen shows a running deal.
-  const open = () => navigate(`/pdp?deal=${activated ? 'live' : 'upcoming'}`)
+  const open = () => {
+    const query = new URLSearchParams({
+      deal: activated ? 'live' : 'upcoming',
+      product: product.productKey,
+    })
+    navigate(`/pdp?${query}`)
+  }
 
   return (
     <article className="pc" onClick={open}>
