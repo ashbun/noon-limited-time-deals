@@ -263,31 +263,27 @@ export default function LimitedTimeDeal({ deal, price, regular, upcomingWas, liv
    already discounted. Once per session, not per product — seeing it on every
    card would be a nuisance rather than a reveal. */
 
-const REVEAL_SEEN_KEY = 'deal-reveal:seen'
 const REVEAL_DELAY = 400
 // Long enough for the reel to land (its slowest column finishes ~2.0s in) plus
 // a beat to actually read the number before it clears.
 const REVEAL_VISIBLE = 2600
 
+// Module scope, deliberately not sessionStorage: this resets on every page load
+// so a refresh replays the reveal, while still holding across SPA navigation so
+// hopping between cards within one load doesn't repeat it.
+let revealShownThisLoad = false
+
 export function useDealReveal(active) {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    if (!active) return undefined
-    let seen = false
-    try {
-      seen = sessionStorage.getItem(REVEAL_SEEN_KEY) === '1'
-    } catch {
-      // private browsing with storage disabled — just skip the reveal
-      return undefined
-    }
-    if (seen) return undefined
+    if (!active || revealShownThisLoad) return undefined
 
-    // Mark it seen only when it actually shows, not when the effect runs.
-    // StrictMode mounts effects twice in dev; flagging up front meant the
-    // second run saw "seen" and the reveal never appeared at all.
+    // Flag on show, not on effect run. StrictMode mounts effects twice in dev;
+    // flagging up front meant the second run saw it as shown and the reveal
+    // never appeared at all.
     const show = setTimeout(() => {
-      sessionStorage.setItem(REVEAL_SEEN_KEY, '1')
+      revealShownThisLoad = true
       setVisible(true)
     }, REVEAL_DELAY)
     const hide = setTimeout(() => setVisible(false), REVEAL_DELAY + REVEAL_VISIBLE)
