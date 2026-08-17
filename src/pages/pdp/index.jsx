@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
 import { getProductVisual } from '../../data/productVisuals'
-import LimitedTimeDeal, { DealSwitcher, formatCountdown, useLimitedTimeDeal } from './LimitedTimeDeal'
+import LimitedTimeDeal, { DealRevealModal, DealSwitcher, formatCountdown, useDealReveal, useLimitedTimeDeal } from './LimitedTimeDeal'
 import AppBottomNav from '../../components/AppBottomNav'
 import './styles.css'
 
@@ -69,6 +69,7 @@ function PDP() {
   const [searchParams] = useSearchParams()
   const deal = useLimitedTimeDeal()
   const productVisual = getProductVisual(searchParams.get('product'))
+  const showReveal = useDealReveal(deal.state === 'live')
   const [showBottomDeal, setShowBottomDeal] = useState(false)
   const [notified, setNotified] = useState(false)
   const [showNotifyToast, setShowNotifyToast] = useState(false)
@@ -131,6 +132,7 @@ function PDP() {
       <AnimatePresence>
         {showNotifyToast && <NotifyToast onDismiss={dismissNotifyToast} />}
       </AnimatePresence>
+      {showReveal && <DealRevealModal price={DEAL.price} remaining={deal.remaining} dh={Dh} />}
       <StatusBar />
       <div className="pdp-scroll" ref={scrollRef}>
         <Gallery imgScale={imgScale} imgOpacity={imgOpacity} productVisual={productVisual} />

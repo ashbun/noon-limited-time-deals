@@ -138,12 +138,15 @@ function buildDigitReel(start, end) {
   )
 }
 
-function AnimatedDealPrice({ price, dh: Dh }) {
+// rowHeight is the reel's row pitch. The travel distance is derived from it,
+// so the two must always agree — the reveal renders at 40px and would land
+// between digits if CSS resized the rows on its own.
+function AnimatedDealPrice({ price, dh: Dh, rowHeight = 28 }) {
   const finalPrice = String(price)
   let reelIndex = -1
 
   return (
-    <span className="ltd-now ltd-price-slot">
+    <span className="ltd-now ltd-price-slot" style={{ '--slot-row': `${rowHeight}px` }}>
       <span className="ltd-price-slot-label"><Dh />{price}</span>
       <span className="ltd-price-slot-visual" aria-hidden="true">
         <Dh />
@@ -164,7 +167,7 @@ function AnimatedDealPrice({ price, dh: Dh }) {
           const style = {
             '--slot-delay': `${600 + reelIndex * 45}ms`,
             '--slot-duration': `${500 + transitions * 75}ms`,
-            '--slot-distance': `${transitions * -28}px`,
+            '--slot-distance': `${transitions * -rowHeight}px`,
           }
 
           return (
@@ -249,6 +252,81 @@ export default function LimitedTimeDeal({ deal, price, regular, upcomingWas, liv
         >
           <span className="ltd-ico ltd-ico--19"><img src="/pdp/icons/o-bell.svg" alt="" /></span>
         </button>
+      </div>
+    </div>
+  )
+}
+
+/* --------------------------- Deal reveal overlay --------------------------- */
+/* Figma 23048:82257. Opening a product on a running deal drops the price in
+   front of you once, then gets out of the way so the PDP behind it reads as
+   already discounted. Once per session, not per product — seeing it on every
+   card would be a nuisance rather than a reveal. */
+
+const REVEAL_SEEN_KEY = 'deal-reveal:seen'
+const REVEAL_DELAY = 400
+// Long enough for the reel to land (its slowest column finishes ~2.0s in) plus
+// a beat to actually read the number before it clears.
+const REVEAL_VISIBLE = 2600
+
+export function useDealReveal(active) {
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    if (!active) return undefined
+    let seen = false
+    try {
+      seen = sessionStorage.getItem(REVEAL_SEEN_KEY) === '1'
+    } catch {
+      // private browsing with storage disabled — just skip the reveal
+      return undefined
+    }
+    if (seen) return undefined
+
+    // Mark it seen only when it actually shows, not when the effect runs.
+    // StrictMode mounts effects twice in dev; flagging up front meant the
+    // second run saw "seen" and the reveal never appeared at all.
+    const show = setTimeout(() => {
+      sessionStorage.setItem(REVEAL_SEEN_KEY, '1')
+      setVisible(true)
+    }, REVEAL_DELAY)
+    const hide = setTimeout(() => setVisible(false), REVEAL_DELAY + REVEAL_VISIBLE)
+    return () => {
+      clearTimeout(show)
+      clearTimeout(hide)
+    }
+  }, [active])
+
+  return visible
+}
+
+export function DealRevealModal({ price, remaining, dh: Dh }) {
+  return (
+    <div className="deal-reveal" role="status" aria-live="polite" data-testid="deal-reveal">
+      {/* ltd--in-view is what arms the digit reel, so the card carries it */}
+      <div className="deal-reveal-card ltd--in-view">
+        <span className="deal-reveal-tab" aria-hidden="true">
+          <img className="deal-reveal-notch deal-reveal-notch--l" src="/pdp/icons/reveal-notch-l.svg" alt="" />
+          <img className="deal-reveal-tab-bg" src="/pdp/icons/reveal-tab.svg" alt="" />
+          <img className="deal-reveal-notch deal-reveal-notch--r" src="/pdp/icons/reveal-notch-r.svg" alt="" />
+          <span className="deal-reveal-tab-content">
+            <span className="ltd-ico ltd-ico--16"><img src="/pdp/icons/reveal-bolt.svg" alt="" /></span>
+            <span className="deal-reveal-tab-label">Limited time deal</span>
+          </span>
+        </span>
+
+        <span className="deal-reveal-price">
+          <AnimatedDealPrice price={price} dh={Dh} rowHeight={40} />
+        </span>
+
+        <span className="deal-reveal-foot">
+          <i className="deal-reveal-rule" aria-hidden="true" />
+          <span className="deal-reveal-timer">
+            <span className="ltd-ico ltd-ico--16"><img src="/pdp/icons/reveal-timelapse.svg" alt="" /></span>
+            Ending in <b>{formatCountdown(remaining)}</b>
+          </span>
+          <i className="deal-reveal-rule" aria-hidden="true" />
+        </span>
       </div>
     </div>
   )

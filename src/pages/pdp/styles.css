@@ -592,7 +592,7 @@
 .ltd-now { font-size: 20px; font-weight: 700; line-height: 28px; letter-spacing: -0.2px; color: #e5641a; }
 .ltd-price-slot {
   position: relative;
-  display: inline-block; height: 28px;
+  display: inline-block; height: var(--slot-row, 28px);
   overflow: hidden; vertical-align: bottom;
 }
 .ltd-price-slot-label {
@@ -602,7 +602,7 @@
 }
 .ltd-price-slot-visual {
   display: inline-flex; align-items: flex-start;
-  height: 28px; white-space: nowrap;
+  height: var(--slot-row, 28px); white-space: nowrap;
 }
 .ltd-price-digit {
   display: inline-block; height: 28px;
@@ -613,11 +613,11 @@
   transform: translateY(0);
 }
 .ltd-price-digit-track > span {
-  display: block; flex: 0 0 28px; height: 28px;
-  line-height: 28px; white-space: nowrap;
+  display: block; flex: 0 0 var(--slot-row, 28px); height: var(--slot-row, 28px);
+  line-height: var(--slot-row, 28px); white-space: nowrap;
 }
 .ltd-price-decimal,
-.ltd-price-static-digit { display: inline-block; height: 28px; line-height: 28px; }
+.ltd-price-static-digit { display: inline-block; height: var(--slot-row, 28px); line-height: var(--slot-row, 28px); }
 .ltd--in-view .ltd-price-digit-track {
   animation: ltd-price-digit-roll var(--slot-duration) cubic-bezier(.22, 1, .36, 1) var(--slot-delay) both;
 }
@@ -672,4 +672,73 @@
 .deal-switch-btn.on {
   background: var(--white); color: var(--ink);
   box-shadow: 0 1px 3px rgba(16, 22, 40, 0.18);
+}
+
+/* --------------------------- Deal reveal overlay --------------------------- */
+/* Figma 23048:82257 — shown once per session when a running deal opens. */
+.deal-reveal {
+  position: absolute; inset: 0; z-index: 60;
+  display: grid; place-items: center;
+  background: rgba(16, 22, 40, 0.55);
+  animation: deal-reveal-in 180ms ease both;
+}
+.deal-reveal-card {
+  position: relative;
+  width: 291px; height: 164px;
+  border: 1px solid var(--white); border-radius: 16px;
+  background: linear-gradient(180deg, #fff5e9 0%, #ffffff 56.96%);
+  animation: deal-reveal-pop 220ms cubic-bezier(.22, 1, .36, 1) both;
+}
+
+/* The tab straddles the card's top edge, with a small notch either side. */
+.deal-reveal-tab {
+  position: absolute; left: 28px; top: -4px;
+  display: block; height: 36px;
+}
+.deal-reveal-tab-bg { display: block; width: 222.35px; height: 36px; margin-left: 6px; }
+.deal-reveal-notch { position: absolute; top: 0; width: 13px; height: 4.01px; }
+.deal-reveal-notch--l { left: 1px; }
+.deal-reveal-notch--r { left: 220.8px; }
+.deal-reveal-tab-content {
+  position: absolute; left: 43px; top: 9px;
+  display: flex; align-items: center; gap: 6px;
+}
+.ltd-ico--16 { width: 16px; height: 16px; }
+.deal-reveal-tab-label {
+  font-size: 14px; font-weight: 700; line-height: normal;
+  letter-spacing: -0.2px; text-transform: uppercase; color: var(--white);
+  white-space: nowrap;
+}
+
+/* The reel runs at 40px here, so its rows are taller than the inline widget's.
+   Overriding the row height keeps the same animation working at this size. */
+.deal-reveal-price {
+  position: absolute; left: 0; right: 0; top: 77px;
+  display: flex; justify-content: center; transform: translateY(-50%);
+  font-size: 40px; font-weight: 700; letter-spacing: -0.333px; color: #000;
+}
+.deal-reveal-price .ltd-now { font-size: 40px; letter-spacing: -0.333px; color: #000; }
+.deal-reveal-price .ltd-price-digit { height: var(--slot-row, 28px); }
+
+.deal-reveal-foot {
+  position: absolute; left: -1px; right: -1px; top: 121px;
+  display: flex; align-items: center;
+}
+.deal-reveal-rule { flex: 1 1 0; min-width: 0; height: 1px; background: #f4d9bf; }
+.deal-reveal-timer {
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center; gap: 4px;
+  height: 28px; padding: 0 8px; border-radius: 24px; background: #fff1e0;
+  font-size: 13px; font-weight: 500; line-height: 20px;
+  letter-spacing: -0.1px; color: #73260d; white-space: nowrap;
+}
+.deal-reveal-timer b { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+@keyframes deal-reveal-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes deal-reveal-pop {
+  from { opacity: 0; transform: scale(.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .deal-reveal, .deal-reveal-card { animation: none; }
 }
