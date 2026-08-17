@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import AppBottomNav from '../../components/AppBottomNav'
@@ -52,28 +52,58 @@ function Dh() {
   return <span className="dh" aria-label="AED">{DH}</span>
 }
 
+// A direction reversal has to travel this far before the bottom bar reacts.
+// Comparing against the previous event's offset instead made a trackpad's ±1px
+// jitter flip the bar open and shut every frame, and each flip runs a 220ms
+// height transition that resizes the scroll container — which is what read as
+// the page shuddering as you scrolled.
+const NAV_THRESHOLD = 10
+
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState('all')
   const [navVisible, setNavVisible] = useState(true)
   const [switcherCollapsed, setSwitcherCollapsed] = useState(false)
-  const lastScrollTop = useRef(0)
+  const latestTop = useRef(0)
+  const navAnchor = useRef(0)
+  const frame = useRef(0)
   const navigate = useNavigate()
+
+  useEffect(() => () => cancelAnimationFrame(frame.current), [])
 
   // Scrolling down hides the bottom bar, scrolling up brings it back — the
   // behaviour the source page added in "Hide bottom navigation while scrolling".
-  // The marketplace rail collapses on a hysteresis (36px down, 12px back up) so
-  // it can't flutter around a single threshold.
+  // The marketplace rail collapses on its own hysteresis (36px down, 12px back
+  // up) so it can't flutter around a single threshold either.
+  //
+  // Coalesced to one update per frame: scroll fires far more often than the
+  // browser paints, and every handler run here sets state on two transitions.
   const onScroll = (event) => {
-    const top = Math.max(0, event.currentTarget.scrollTop)
-    const previousTop = lastScrollTop.current
+    latestTop.current = Math.max(0, event.currentTarget.scrollTop)
+    if (frame.current) return
 
-    setSwitcherCollapsed((collapsed) => (collapsed ? top > 12 : top > 36))
+    frame.current = requestAnimationFrame(() => {
+      frame.current = 0
+      const top = latestTop.current
 
-    if (top <= 4) setNavVisible(true)
-    else if (top > previousTop) setNavVisible(false)
-    else if (top < previousTop) setNavVisible(true)
+      setSwitcherCollapsed((collapsed) => (collapsed ? top > 12 : top > 36))
 
-    lastScrollTop.current = top
+      if (top <= 4) {
+        setNavVisible(true)
+        navAnchor.current = top
+        return
+      }
+
+      // The anchor only moves when the bar actually changes, so the threshold is
+      // measured from the last decision rather than from the last event.
+      const travelled = top - navAnchor.current
+      if (travelled > NAV_THRESHOLD) {
+        setNavVisible(false)
+        navAnchor.current = top
+      } else if (travelled < -NAV_THRESHOLD) {
+        setNavVisible(true)
+        navAnchor.current = top
+      }
+    })
   }
 
   const openListing = () => navigate('/plp')
