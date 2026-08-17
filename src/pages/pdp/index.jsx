@@ -69,7 +69,7 @@ function PDP() {
   const [searchParams] = useSearchParams()
   const deal = useLimitedTimeDeal()
   const productVisual = getProductVisual(searchParams.get('product'))
-  const showReveal = useDealReveal(deal.state === 'live', DEAL.price)
+  const reveal = useDealReveal(deal.state === 'live', DEAL.price)
   const [showBottomDeal, setShowBottomDeal] = useState(false)
   const [notified, setNotified] = useState(false)
   const [showNotifyToast, setShowNotifyToast] = useState(false)
@@ -133,13 +133,19 @@ function PDP() {
         {showNotifyToast && <NotifyToast onDismiss={dismissNotifyToast} />}
       </AnimatePresence>
       <AnimatePresence>
-        {showReveal && <DealRevealModal price={DEAL.price} remaining={deal.remaining} dh={Dh} />}
+        {reveal.visible && <DealRevealModal price={DEAL.price} remaining={deal.remaining} dh={Dh} />}
       </AnimatePresence>
       <StatusBar />
       <div className="pdp-scroll" ref={scrollRef}>
         <Gallery imgScale={imgScale} imgOpacity={imgOpacity} productVisual={productVisual} />
         <div className="pdp-sections">
-          <MainInfo deal={deal} notified={notified} onNotify={requestDealNotification} productName={productVisual.name} />
+          <MainInfo
+            deal={deal}
+            notified={notified}
+            onNotify={requestDealNotification}
+            productName={productVisual.name}
+            animateDealPrice={!reveal.ownsPrice}
+          />
           <Delivery />
           <PaymentOffers />
           <VariantPicker />
@@ -356,7 +362,7 @@ function UnitDetails() {
   )
 }
 
-function MainInfo({ deal, notified, onNotify, productName }) {
+function MainInfo({ deal, notified, onNotify, productName, animateDealPrice = true }) {
   return (
     <section className="main-info">
       <div className="store-row">
@@ -383,7 +389,7 @@ function MainInfo({ deal, notified, onNotify, productName }) {
         </span>
       </div>
 
-      <LimitedTimeDeal deal={deal} dh={Dh} notified={notified} onNotify={onNotify} {...DEAL} />
+      <LimitedTimeDeal deal={deal} dh={Dh} notified={notified} onNotify={onNotify} animatePrice={animateDealPrice} {...DEAL} />
       <UnitDetails />
 
       <div className="coupons">

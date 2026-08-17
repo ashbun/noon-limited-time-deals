@@ -207,7 +207,7 @@ function AnimatedDealPrice({ price, dh: Dh, rowHeight = 28 }) {
   )
 }
 
-export default function LimitedTimeDeal({ deal, price, regular, upcomingWas, liveWas, off, save, dh: Dh, notified, onNotify }) {
+export default function LimitedTimeDeal({ deal, price, regular, upcomingWas, liveWas, off, save, dh: Dh, notified, onNotify, animatePrice = true }) {
   const [widgetRef, inView] = useViewportPresence()
   if (deal.state === 'ended') return null
   const live = deal.state === 'live'
@@ -234,7 +234,12 @@ export default function LimitedTimeDeal({ deal, price, regular, upcomingWas, liv
 
         <div className="ltd-body">
           <div className="ltd-price-row">
-            <AnimatedDealPrice price={price} dh={Dh} />
+            {/* The reveal overlay runs the drop itself. When it does, this price
+                is already the discounted one from the first paint — reeling it
+                here as well would replay the same animation behind the modal. */}
+            {animatePrice
+              ? <AnimatedDealPrice price={price} dh={Dh} />
+              : <span className="ltd-now"><Dh />{price}</span>}
             <span className="ltd-save">Save <Dh />{save}</span>
           </div>
           <div className="ltd-subrow">
@@ -296,8 +301,14 @@ const REVEAL_LINGER = 400
 // hopping between cards within one load doesn't repeat it.
 let revealShownThisLoad = false
 
+/* Returns { visible, ownsPrice }. ownsPrice latches true on the first render
+   where the reveal is due, so the widget behind can paint the settled price
+   immediately instead of reeling into it a second time. It stays true after the
+   modal leaves — by then the price has already been revealed. */
 export function useDealReveal(active, price) {
   const [visible, setVisible] = useState(false)
+  const [ownsPrice, setOwnsPrice] = useState(() => active && !revealShownThisLoad)
+  if (!ownsPrice && active && !revealShownThisLoad) setOwnsPrice(true)
 
   useEffect(() => {
     if (!active || revealShownThisLoad) return undefined
@@ -317,7 +328,7 @@ export function useDealReveal(active, price) {
     }
   }, [active])
 
-  return visible
+  return { visible, ownsPrice }
 }
 
 export function DealRevealModal({ price, remaining, dh: Dh }) {
