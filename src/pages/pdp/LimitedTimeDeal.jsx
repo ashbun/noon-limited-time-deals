@@ -124,27 +124,49 @@ function useViewportPresence() {
 
 const INITIAL_DEAL_PRICE = '349.99'
 
-// Reel timing, named so the reveal can work out when the last column lands
-// instead of guessing at a duration that would drift if these changed.
+// Reel timing. Columns start left-to-right REEL_STAGGER apart and — the point of
+// this shape — LAND left-to-right too, each landing REEL_LAND_STAGGER after the
+// column to its left. Deriving each column's duration from its travel distance
+// instead meant the landing order fell out of whichever digit happened to have
+// furthest to go, which read as random.
 const REEL_DELAY = 600
 const REEL_STAGGER = 45
-const REEL_DURATION = 500
-const REEL_STEP = 75
+const REEL_SPAN = 900
+const REEL_LAND_STAGGER = 120
 
-/* Walks the same columns AnimatedDealPrice renders and returns when the slowest
-   one finishes, measured from the moment the reel mounts. */
-export function reelDuration(price) {
-  let reelIndex = -1
-  let last = 0
-  ;[...String(price)].forEach((end, index) => {
-    if (!/\d/.test(end)) return
-    const start = INITIAL_DEAL_PRICE[index] ?? end
-    if (index === 0 && start === end) return
-    reelIndex += 1
-    const transitions = buildDigitReel(start, end).length - 1
-    last = Math.max(last, REEL_DELAY + reelIndex * REEL_STAGGER + REEL_DURATION + transitions * REEL_STEP)
-  })
-  return last
+/* Ordered landings mean duration no longer scales with distance, so a column
+   with only a step or two to travel would crawl. Every column laps until it has
+   a comparable distance to cover, keeping the speeds within sight of each other. */
+const MIN_TRANSITIONS = 6
+
+function isReelColumn(price, index) {
+  const end = String(price)[index]
+  if (!/\d/.test(end)) return false
+  const start = INITIAL_DEAL_PRICE[index] ?? end
+  // A leading digit that isn't changing has nothing to show, so it stays put.
+  return !(index === 0 && start === end)
+}
+
+function reelColumnCount(price) {
+  return [...String(price)].filter((_, index) => isReelColumn(price, index)).length
+}
+
+/* reelIndex is the column's position among the reeling columns, left to right —
+   which is what both the start and the landing are staggered by. */
+function columnTiming(reelIndex, startDelay) {
+  const delay = startDelay + reelIndex * REEL_STAGGER
+  const land = startDelay + REEL_SPAN + reelIndex * REEL_LAND_STAGGER
+  return { delay, duration: land - delay }
+}
+
+/* When the last column lands, measured from the moment the reel mounts.
+   startDelay must match the one handed to the reel, or the reveal's hold drifts
+   off the landing. */
+export function reelDuration(price, startDelay = REEL_DELAY) {
+  const count = reelColumnCount(price)
+  if (!count) return 0
+  const { delay, duration } = columnTiming(count - 1, startDelay)
+  return delay + duration
 }
 
 function buildDigitReel(start, end) {
@@ -152,9 +174,10 @@ function buildDigitReel(start, end) {
   const endDigit = Number(end)
   // Matching digits that are animated elsewhere in the price still travel
   // through one complete reel so every animated column has visible movement.
-  const transitions = startDigit === endDigit
+  let transitions = startDigit === endDigit
     ? 10
     : (startDigit - endDigit + 10) % 10
+  while (transitions < MIN_TRANSITIONS) transitions += 10
 
   return Array.from(
     { length: transitions + 1 },
@@ -165,12 +188,19 @@ function buildDigitReel(start, end) {
 // rowHeight is the reel's row pitch. The travel distance is derived from it,
 // so the two must always agree — the reveal renders at 40px and would land
 // between digits if CSS resized the rows on its own.
-function AnimatedDealPrice({ price, dh: Dh, rowHeight = 28 }) {
+function AnimatedDealPrice({ price, dh: Dh, rowHeight = 28, startDelay = REEL_DELAY }) {
   const finalPrice = String(price)
+  // Each column overshoots its landing by a tenth of a row and eases back, so
+  // the digits settle rather than stopping dead. The spare row appended below
+  // each track is what shows through during that overshoot.
+  const overshoot = Math.max(2, Math.round(rowHeight * 0.1))
   let reelIndex = -1
 
   return (
-    <span className="ltd-now ltd-price-slot" style={{ '--slot-row': `${rowHeight}px` }}>
+    <span
+      className="ltd-now ltd-price-slot"
+      style={{ '--slot-row': `${rowHeight}px`, '--slot-overshoot': `${-overshoot}px` }}
+    >
       <span className="ltd-price-slot-label"><Dh />{price}</span>
       <span className="ltd-price-slot-visual" aria-hidden="true">
         <Dh />
@@ -180,24 +210,28 @@ function AnimatedDealPrice({ price, dh: Dh, rowHeight = 28 }) {
           }
 
           const start = INITIAL_DEAL_PRICE[index] ?? end
-          const isUnchangedLeadingDigit = index === 0 && start === end
-          if (isUnchangedLeadingDigit) {
+          if (!isReelColumn(price, index)) {
             return <span className="ltd-price-static-digit" key={`${index}-${end}`}>{end}</span>
           }
 
           reelIndex += 1
           const digits = buildDigitReel(start, end)
           const transitions = digits.length - 1
+          const { delay, duration } = columnTiming(reelIndex, startDelay)
           const style = {
-            '--slot-delay': `${REEL_DELAY + reelIndex * REEL_STAGGER}ms`,
-            '--slot-duration': `${REEL_DURATION + transitions * REEL_STEP}ms`,
+            '--slot-delay': `${delay}ms`,
+            '--slot-duration': `${duration}ms`,
             '--slot-distance': `${transitions * -rowHeight}px`,
           }
+          // Kept off `digits` so the landing distance and reelDuration()'s maths
+          // stay based on the real transition count.
+          const spare = String((Number(end) - 1 + 10) % 10)
 
           return (
             <span className="ltd-price-digit" style={style} key={`${index}-${start}-${end}`}>
               <span className="ltd-price-digit-track">
                 {digits.map((digit, step) => <span key={`${digit}-${step}`}>{digit}</span>)}
+                <span aria-hidden="true">{spare}</span>
               </span>
             </span>
           )
@@ -292,9 +326,12 @@ export default function LimitedTimeDeal({ deal, price, regular, upcomingWas, liv
    already discounted. Once per session, not per product — seeing it on every
    card would be a nuisance rather than a reveal. */
 
-const REVEAL_DELAY = 400
 // How long the settled price stays up after the reel finishes.
 const REVEAL_LINGER = 400
+// The pre-deal price has to be readable, not just present: the card is legible
+// from roughly 250ms (opacity full, near its resting place), so holding the reel
+// to 520ms leaves a genuine 300ms to read Ð349.99 before it moves.
+const REVEAL_REEL_DELAY = 520
 
 // Module scope, deliberately not sessionStorage: this resets on every page load
 // so a refresh replays the reveal, while still holding across SPA navigation so
@@ -306,27 +343,27 @@ let revealShownThisLoad = false
    immediately instead of reeling into it a second time. It stays true after the
    modal leaves — by then the price has already been revealed. */
 export function useDealReveal(active, price) {
-  const [visible, setVisible] = useState(false)
+  // Both initialise from the render phase rather than flipping on a timer: the
+  // modal has to be in the same painted frame as the PDP. Showing it a beat later
+  // gave you a clear look at the undiscounted page first, which is the one thing
+  // the reveal exists to prevent.
+  const [visible, setVisible] = useState(() => active && !revealShownThisLoad)
   const [ownsPrice, setOwnsPrice] = useState(() => active && !revealShownThisLoad)
   if (!ownsPrice && active && !revealShownThisLoad) setOwnsPrice(true)
 
   useEffect(() => {
-    if (!active || revealShownThisLoad) return undefined
+    // Gated on ownsPrice, not the module flag. The flag is set here, so a second
+    // effect run — StrictMode does exactly that in dev — would read it as
+    // already-shown and bail without ever scheduling the hide, leaving the modal
+    // up for good. ownsPrice was latched during render, before the flag moved.
+    if (!ownsPrice) return undefined
 
-    // Flag on show, not on effect run. StrictMode mounts effects twice in dev;
-    // flagging up front meant the second run saw it as shown and the reveal
-    // never appeared at all.
-    const show = setTimeout(() => {
-      revealShownThisLoad = true
-      setVisible(true)
-    }, REVEAL_DELAY)
-    const visibleFor = reelDuration(price) + REVEAL_LINGER
-    const hide = setTimeout(() => setVisible(false), REVEAL_DELAY + visibleFor)
-    return () => {
-      clearTimeout(show)
-      clearTimeout(hide)
-    }
-  }, [active])
+    revealShownThisLoad = true
+    setVisible(true)
+    const visibleFor = reelDuration(price, REVEAL_REEL_DELAY) + REVEAL_LINGER
+    const hide = setTimeout(() => setVisible(false), visibleFor)
+    return () => clearTimeout(hide)
+  }, [ownsPrice])
 
   return { visible, ownsPrice }
 }
@@ -335,13 +372,24 @@ export function DealRevealModal({ price, remaining, dh: Dh }) {
   const reduceMotion = useReducedMotion()
 
   // Rises up as though lifted off the card you tapped, then drops back down and
-  // fades once the reel has landed.
+  // fades once the reel has landed. A spring rather than a tween: the slight
+  // overshoot at the top of the travel is what stops the arrival reading as
+  // snappy. Opacity gets its own tween — a spring would overshoot past 1 and
+  // waste the first frames of the fade on a value the browser clamps anyway.
   const card = reduceMotion
     ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
     : {
-      initial: { opacity: 0, y: 96, scale: 0.96 },
+      initial: { opacity: 0, y: 88, scale: 0.94 },
       animate: { opacity: 1, y: 0, scale: 1 },
-      exit: { opacity: 0, y: 72, scale: 0.98 },
+      // Leaving is not an arrival: it drops clean out of the frame on a steeply
+      // accelerating curve rather than easing to a stop mid-air. 560px is past
+      // the bottom of the tallest phone frame, and .phone clips it on the way.
+      // Scale holds at 1 — shrinking would read as receding, not falling.
+      exit: {
+        opacity: 0,
+        y: 560,
+        transition: { duration: 0.34, ease: [0.7, 0, 0.84, 0] },
+      },
     }
 
   return (
@@ -352,17 +400,28 @@ export function DealRevealModal({ price, remaining, dh: Dh }) {
       data-testid="deal-reveal"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      // Outlasts the card's fall, so the scrim doesn't take the falling card
+      // with it before it has cleared the frame.
+      exit={{
+        opacity: 0,
+        transition: reduceMotion
+          ? { duration: 0 }
+          : { duration: 0.32, delay: 0.06, ease: 'linear' },
+      }}
       transition={{ duration: reduceMotion ? 0 : 0.2 }}
     >
       {/* ltd--in-view is what arms the digit reel, so the card carries it */}
       <motion.div
         className="deal-reveal-card ltd--in-view"
         {...card}
-        transition={{
-          duration: reduceMotion ? 0 : 0.34,
-          ease: [0.22, 1, 0.36, 1],
-        }}
+        transition={reduceMotion
+          ? { duration: 0 }
+          : {
+            type: 'spring',
+            visualDuration: 0.52,
+            bounce: 0.28,
+            opacity: { type: 'tween', duration: 0.22, ease: 'linear' },
+          }}
       >
         <span className="deal-reveal-tab" aria-hidden="true">
           <img className="deal-reveal-notch deal-reveal-notch--l" src="/pdp/icons/reveal-notch-l.svg" alt="" />
@@ -378,7 +437,7 @@ export function DealRevealModal({ price, remaining, dh: Dh }) {
         </span>
 
         <span className="deal-reveal-price">
-          <AnimatedDealPrice price={price} dh={Dh} rowHeight={40} />
+          <AnimatedDealPrice price={price} dh={Dh} rowHeight={40} startDelay={REVEAL_REEL_DELAY} />
         </span>
 
         <span className="deal-reveal-foot">

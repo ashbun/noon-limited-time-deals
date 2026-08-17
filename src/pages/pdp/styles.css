@@ -567,8 +567,8 @@
   letter-spacing: -0.18px; color: #e5641a;
 }
 /* The column's 6px gap is right everywhere except under the deal price, which
-   sits 4px tighter to its saving line. */
-.ltd--locked .ltd-save { font-size: 14px; line-height: 20px; letter-spacing: -0.1px; margin-top: -4px; }
+   pulls all the way up to its saving line — the two read as one price block. */
+.ltd--locked .ltd-save { font-size: 14px; line-height: 20px; letter-spacing: -0.1px; margin-top: -6px; }
 .ltd-unlock {
   align-self: flex-start;
   display: inline-flex; align-items: center; gap: 4px;
@@ -620,11 +620,28 @@
 }
 .ltd-price-decimal,
 .ltd-price-static-digit { display: inline-block; height: var(--slot-row, 28px); line-height: var(--slot-row, 28px); }
-.ltd--in-view .ltd-price-digit-track {
-  animation: ltd-price-digit-roll var(--slot-duration) cubic-bezier(.22, 1, .36, 1) var(--slot-delay) both;
+/* The dirham glyph is a bare inline span, so inside the slot's flex row it kept
+   its own normal line box and sat off the digits' baseline — most visible at the
+   reveal's 40px. Give it the same row box every other column uses. */
+.ltd-price-slot-visual .dh {
+  display: inline-block;
+  height: var(--slot-row, 28px); line-height: var(--slot-row, 28px);
 }
+.ltd--in-view .ltd-price-digit-track {
+  animation: ltd-price-digit-roll var(--slot-duration) var(--slot-delay) both;
+}
+/* Runs a touch past the landing row and eases back, so a column arrives with
+   weight instead of stopping dead. Per-keyframe timing functions: the roll
+   decelerates into the overshoot, then the recovery is a gentle ease-in-out. */
 @keyframes ltd-price-digit-roll {
-  0% { transform: translateY(0); }
+  0% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(.22, 1, .36, 1);
+  }
+  76% {
+    transform: translateY(calc(var(--slot-distance) + var(--slot-overshoot, 0px)));
+    animation-timing-function: cubic-bezier(.33, 0, .67, 1);
+  }
   100% { transform: translateY(var(--slot-distance)); }
 }
 .ltd--live .ltd-was { font-size: 14px; line-height: 20px; }

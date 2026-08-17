@@ -49,10 +49,10 @@ const PRODUCTS = [
     reviews: '(128)',
     tag: 'Best Seller',
     ad: true,
-    price: 350,
+    price: 899,
     was: 1399,
     off: '40%',
-    dealPrice: 301,
+    dealPrice: 849,
   },
 ]
 
