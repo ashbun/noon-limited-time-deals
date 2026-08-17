@@ -1,12 +1,13 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { Retune } from 'retune'
+import HomePage from './pages/home'
 import PdpPage from './pages/pdp'
 import PlpPage from './pages/plp'
 
 // Adding a page: drop it in src/pages/<name>/ and add a <Route> below.
-// `/` forwards to the listing, which is the entry point — tapping a card there
-// opens the PDP in the deal state that card was showing.
+// `/` forwards to the homepage, which is the entry point. The flow runs
+// home → listing → product, and each step's back control returns to the last.
 
 // Pages cross-fade on navigation. The outgoing page fades while the incoming
 // one fades in over it, so the phone frame never flashes empty between routes.
@@ -37,10 +38,11 @@ export default function App() {
       <AnimatePresence initial={false}>
         <Page key={location.pathname}>
           <Routes location={location}>
-            <Route path="/" element={<Navigate to="/plp" replace />} />
+            <Route path="/" element={<Navigate to="/home" replace />} />
+            <Route path="/home" element={<HomePage />} />
             <Route path="/plp" element={<PlpPage />} />
             <Route path="/pdp" element={<PdpPage />} />
-            <Route path="*" element={<Navigate to="/plp" replace />} />
+            <Route path="*" element={<Navigate to="/home" replace />} />
           </Routes>
         </Page>
       </AnimatePresence>

@@ -106,7 +106,7 @@ export default function PlpPage() {
     <div className="stage">
       <div className="phone">
         <div className="plp">
-          <PlpHeader />
+          <PlpHeader onBack={useBackToHome()} />
           <div className="plp-scroll" ref={scrollRef}>
             <div className="plp-grid">
               {GRID.map((product) => <ProductCard key={product.id} product={product} />)}
@@ -120,7 +120,18 @@ export default function PlpPage() {
   )
 }
 
-function PlpHeader() {
+// Pops history when we arrived from the homepage rather than pushing another
+// entry, so the browser's own back button stays coherent. On a deep link there
+// is nothing to pop, so land on the homepage instead. Same rule as the PDP's.
+function useBackToHome() {
+  const navigate = useNavigate()
+  return () => {
+    if (window.history.state?.idx > 0) navigate(-1)
+    else navigate('/home')
+  }
+}
+
+function PlpHeader({ onBack }) {
   return (
     <div className="plp-header">
       <div className="plp-statusbar">
@@ -134,7 +145,9 @@ function PlpHeader() {
 
       <div className="plp-searchrow">
         <div className="plp-search">
-          <span className="plp-ico plp-ico--18"><img src="/plp/icons/back.svg" alt="" /></span>
+          <button className="plp-back" type="button" aria-label="Back" onClick={onBack}>
+            <span className="plp-ico plp-ico--18"><img src="/plp/icons/back.svg" alt="" /></span>
+          </button>
           <span className="plp-search-label">Search</span>
           <span className="plp-search-divider" aria-hidden="true" />
           <span className="plp-ico plp-ico--20"><img src="/plp/icons/camera.svg" alt="" /></span>

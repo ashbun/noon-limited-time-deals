@@ -30,6 +30,13 @@
   border: 1px solid rgba(64, 69, 83, 0.15); border-radius: 12px;
   background: var(--white);
 }
+/* The chevron is the way back to the homepage, so it needs its own hit target
+   inside the search pill rather than being part of the pill's own tap area. */
+.plp-back {
+  flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0; border: 0; background: transparent; cursor: pointer;
+}
 .plp-search-label {
   flex: 1; min-width: 0;
   font-size: 14px; font-weight: 500; line-height: 18px; color: var(--ink-800);

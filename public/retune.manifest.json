@@ -1,0 +1,129 @@
+{
+  "version": 2,
+  "components": {
+    "LimitedTimeDeal": {
+      "props": {
+        "price": { "type": "string" },
+        "regular": { "type": "string" },
+        "liveWas": { "type": "number" },
+        "upcomingWas": { "type": "number" },
+        "off": { "type": "number" },
+        "save": { "type": "number" },
+        "notified": { "type": "boolean" },
+        "animatePrice": { "type": "boolean" }
+      }
+    },
+    "DealRevealModal": {
+      "props": {
+        "price": { "type": "string" },
+        "remaining": { "type": "number" }
+      }
+    },
+    "MainInfo": {
+      "props": {
+        "productName": { "type": "string" },
+        "notified": { "type": "boolean" },
+        "animateDealPrice": { "type": "boolean" }
+      }
+    },
+    "TopNav": {
+      "props": {
+        "state": { "type": "enum", "values": [1, 2] }
+      }
+    },
+    "BottomNav": {
+      "props": {
+        "showDeal": { "type": "boolean" },
+        "notified": { "type": "boolean" }
+      }
+    },
+    "BottomDeal": {
+      "props": {
+        "notified": { "type": "boolean" }
+      }
+    },
+    "Stars": {
+      "props": {
+        "value": { "type": "number" },
+        "size": { "type": "number" }
+      }
+    },
+    "VariantPicker": {
+      "state": {
+        "version": { "type": "enum", "values": ["UK 3 PIN", "US 2 PIN"] },
+        "model": { "type": "enum", "values": ["UK 3 PIN", "US 2 PIN"] },
+        "colour": { "type": "enum", "values": ["735 GaN", "735 GaN II", "736 GaN II", "736 GaN"] }
+      }
+    },
+    "ProductDetails": {
+      "state": {
+        "open": { "type": "enum", "values": ["Overview", "Highlights", "Specifications"] }
+      }
+    }
+  },
+  "tokens": {
+    "colors": {
+      "accent": {
+        "blue": { "value": "#0057ff", "variable": "--blue" },
+        "blue2": { "value": "#0F61FF", "variable": "--blue2" },
+        "blue-600": { "value": "#0076ff", "variable": "--blue-600" },
+        "blue-100": { "value": "#e1efff", "variable": "--blue-100" },
+        "blue-tint": { "value": "#eff7ff", "variable": "--blue-tint" }
+      },
+      "ink": {
+        "ink": { "value": "#101628", "variable": "--ink" },
+        "ink-900": { "value": "#1d2539", "variable": "--ink-900" },
+        "ink-800": { "value": "#343d54", "variable": "--ink-800" },
+        "ink-700": { "value": "#475067", "variable": "--ink-700" },
+        "ink-600": { "value": "#666d85", "variable": "--ink-600" },
+        "ink-500": { "value": "#989fb3", "variable": "--ink-500" }
+      },
+      "surface": {
+        "white": { "value": "#fff", "variable": "--white" },
+        "surface": { "value": "#f9f9fb", "variable": "--surface" },
+        "line": { "value": "#eaecf0", "variable": "--line" },
+        "line-2": { "value": "#f2f3f7", "variable": "--line-2" },
+        "line-3": { "value": "#f3f5f7", "variable": "--line-3" }
+      },
+      "status": {
+        "green": { "value": "#02a31e", "variable": "--green" },
+        "emerald": { "value": "#1f7a74", "variable": "--emerald" },
+        "emerald-800": { "value": "#13645f", "variable": "--emerald-800" },
+        "red": { "value": "#e01e2b", "variable": "--red" },
+        "yellow": { "value": "#feee00", "variable": "--yellow" },
+        "navy": { "value": "#2122b8", "variable": "--navy" }
+      },
+      "deal": {
+        "deal-orange": { "value": "#e5641a" },
+        "deal-orange-mid": { "value": "#f78747" },
+        "deal-orange-deep": { "value": "#f27833" },
+        "deal-saving": { "value": "#12a168" },
+        "deal-ink": { "value": "#491604" },
+        "deal-timer-ink": { "value": "#73260d" },
+        "deal-pill": { "value": "#fff1e0" },
+        "deal-tint": { "value": "#fff7ed" },
+        "deal-tint-2": { "value": "#fffbf6" },
+        "deal-card-top": { "value": "#fff5e9" },
+        "deal-rule": { "value": "#f4d9bf" }
+      }
+    },
+    "radii": {
+      "radius": { "value": "12px", "variable": "--radius" }
+    },
+    "typography": {
+      "size-9": { "value": "9px" },
+      "size-10": { "value": "10px" },
+      "size-11": { "value": "11px" },
+      "size-12": { "value": "12px" },
+      "size-13": { "value": "13px" },
+      "size-14": { "value": "14px" },
+      "size-15": { "value": "15px" },
+      "size-16": { "value": "16px" },
+      "size-18": { "value": "18px" },
+      "size-20": { "value": "20px" },
+      "size-24": { "value": "24px" },
+      "size-30": { "value": "30px" },
+      "size-40": { "value": "40px" }
+    }
+  }
+}
