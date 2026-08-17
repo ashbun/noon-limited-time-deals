@@ -132,7 +132,9 @@ function PDP() {
       <AnimatePresence>
         {showNotifyToast && <NotifyToast onDismiss={dismissNotifyToast} />}
       </AnimatePresence>
-      {showReveal && <DealRevealModal price={DEAL.price} remaining={deal.remaining} dh={Dh} />}
+      <AnimatePresence>
+        {showReveal && <DealRevealModal price={DEAL.price} remaining={deal.remaining} dh={Dh} />}
+      </AnimatePresence>
       <StatusBar />
       <div className="pdp-scroll" ref={scrollRef}>
         <Gallery imgScale={imgScale} imgOpacity={imgOpacity} productVisual={productVisual} />

@@ -682,14 +682,12 @@
   position: absolute; inset: 0; z-index: 60;
   display: grid; place-items: center;
   background: rgba(16, 22, 40, 0.55);
-  animation: deal-reveal-in 180ms ease both;
 }
 .deal-reveal-card {
   position: relative;
   width: 291px; height: 164px;
   border: 1px solid var(--white); border-radius: 16px;
   background: linear-gradient(180deg, #fff5e9 0%, #ffffff 56.96%);
-  animation: deal-reveal-pop 220ms cubic-bezier(.22, 1, .36, 1) both;
 }
 
 /* The tab straddles the card's top edge, with a small notch either side. */
@@ -697,7 +695,11 @@
   position: absolute; left: 28px; top: -4px;
   display: block; height: 36px;
 }
-.deal-reveal-tab-bg { display: block; width: 222.35px; height: 36px; margin-left: 6px; }
+.deal-reveal-tab-art {
+  position: absolute; left: 6px; top: 0;
+  width: 222.35px; height: 36px; overflow: hidden;
+}
+.deal-reveal-tab-bg { display: block; width: 100%; height: 100%; }
 .deal-reveal-notch { position: absolute; top: 0; width: 13px; height: 4.01px; }
 .deal-reveal-notch--l { left: 1px; }
 .deal-reveal-notch--r { left: 220.8px; }
@@ -736,11 +738,30 @@
 }
 .deal-reveal-timer b { font-weight: 700; font-variant-numeric: tabular-nums; }
 
-@keyframes deal-reveal-in { from { opacity: 0; } to { opacity: 1; } }
-@keyframes deal-reveal-pop {
-  from { opacity: 0; transform: scale(.94); }
-  to { opacity: 1; transform: scale(1); }
+/* Shimmer sweeping the tab, same treatment as the PDP ribbon: a soft highlight
+   masked to the artwork so it only lights the orange, never the card behind. */
+.deal-reveal-shimmer {
+  position: absolute; inset: 0; pointer-events: none;
+  -webkit-mask: url('/pdp/icons/reveal-tab.svg') center / 100% 100% no-repeat;
+  mask: url('/pdp/icons/reveal-tab.svg') center / 100% 100% no-repeat;
+}
+.deal-reveal-shimmer::after {
+  content: '';
+  position: absolute; top: -15px; bottom: -15px; left: -58px;
+  width: 46px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .8), transparent);
+  filter: blur(.3px);
+  transform: translateX(0) skewX(-18deg);
+  opacity: 0;
+  /* 800ms sweep, 1500ms pause — matching the ribbon's cadence. */
+  animation: deal-reveal-shimmer 2300ms linear infinite;
+}
+@keyframes deal-reveal-shimmer {
+  0% { transform: translateX(0) skewX(-18deg); opacity: 0; }
+  5.5652% { opacity: .32; }
+  29.2174% { opacity: .32; }
+  34.7826%, 100% { transform: translateX(300px) skewX(-18deg); opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .deal-reveal, .deal-reveal-card { animation: none; }
+  .deal-reveal-shimmer::after { animation: none; }
 }

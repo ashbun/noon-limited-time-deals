@@ -31,13 +31,18 @@ export default function App() {
 
   return (
     <>
+      {/* The keyed wrapper goes *outside* Routes. Keying Routes itself made
+          AnimatePresence rebuild the tree on ordinary re-renders, which threw
+          away in-page state — the deal reveal's timers among it. */}
       <AnimatePresence initial={false}>
-        <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<Navigate to="/plp" replace />} />
-          <Route path="/plp" element={<Page><PlpPage /></Page>} />
-          <Route path="/pdp" element={<Page><PdpPage /></Page>} />
-          <Route path="*" element={<Navigate to="/plp" replace />} />
-        </Routes>
+        <Page key={location.pathname}>
+          <Routes location={location}>
+            <Route path="/" element={<Navigate to="/plp" replace />} />
+            <Route path="/plp" element={<PlpPage />} />
+            <Route path="/pdp" element={<PdpPage />} />
+            <Route path="*" element={<Navigate to="/plp" replace />} />
+          </Routes>
+        </Page>
       </AnimatePresence>
       <Retune />
     </>

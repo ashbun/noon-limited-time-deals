@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
 import { useSearchParams } from 'react-router-dom'
 
 // Limited-time deal banner — Figma "PDP new features" node 22627:19400.
@@ -297,13 +298,44 @@ export function useDealReveal(active) {
 }
 
 export function DealRevealModal({ price, remaining, dh: Dh }) {
+  const reduceMotion = useReducedMotion()
+
+  // Rises up as though lifted off the card you tapped, then drops back down and
+  // fades once the reel has landed.
+  const card = reduceMotion
+    ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
+    : {
+      initial: { opacity: 0, y: 96, scale: 0.96 },
+      animate: { opacity: 1, y: 0, scale: 1 },
+      exit: { opacity: 0, y: 72, scale: 0.98 },
+    }
+
   return (
-    <div className="deal-reveal" role="status" aria-live="polite" data-testid="deal-reveal">
+    <motion.div
+      className="deal-reveal"
+      role="status"
+      aria-live="polite"
+      data-testid="deal-reveal"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: reduceMotion ? 0 : 0.2 }}
+    >
       {/* ltd--in-view is what arms the digit reel, so the card carries it */}
-      <div className="deal-reveal-card ltd--in-view">
+      <motion.div
+        className="deal-reveal-card ltd--in-view"
+        {...card}
+        transition={{
+          duration: reduceMotion ? 0 : 0.34,
+          ease: [0.22, 1, 0.36, 1],
+        }}
+      >
         <span className="deal-reveal-tab" aria-hidden="true">
           <img className="deal-reveal-notch deal-reveal-notch--l" src="/pdp/icons/reveal-notch-l.svg" alt="" />
-          <img className="deal-reveal-tab-bg" src="/pdp/icons/reveal-tab.svg" alt="" />
+          <span className="deal-reveal-tab-art">
+            <img className="deal-reveal-tab-bg" src="/pdp/icons/reveal-tab.svg" alt="" />
+            <span className="deal-reveal-shimmer" />
+          </span>
           <img className="deal-reveal-notch deal-reveal-notch--r" src="/pdp/icons/reveal-notch-r.svg" alt="" />
           <span className="deal-reveal-tab-content">
             <span className="ltd-ico ltd-ico--16"><img src="/pdp/icons/reveal-bolt.svg" alt="" /></span>
@@ -323,7 +355,7 @@ export function DealRevealModal({ price, remaining, dh: Dh }) {
           </span>
           <i className="deal-reveal-rule" aria-hidden="true" />
         </span>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
