@@ -1,3 +1,5 @@
+// `name` is the single source of truth for the product title: the PLP card and
+// the PDP both read it, so the two can never drift apart.
 export const PRODUCT_VISUALS = {
   shoerack: {
     image: '/plp/product-shoerack.png',
@@ -9,7 +11,7 @@ export const PRODUCT_VISUALS = {
   airpods: {
     image: '/plp/product-airpods.png',
     fit: 'contain',
-    name: 'Apple Airpods Pro 2 Wireless Earbuds, Active Noise Cancellation',
+    name: 'Apple Airpods Pro 2 Wireless Earbuds',
     alt: 'Apple AirPods Pro 2 wireless earbuds',
     edgeToEdge: true,
   },
