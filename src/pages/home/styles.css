@@ -161,7 +161,7 @@
    to 12px inside its own 375px frame; this phone is 390px, so a centred fixed
    width drifted to 19.5px. */
 .home-search {
-  margin: 0 12px;
+  width: calc(100% - 24px); margin: 0 12px;
   display: flex; align-items: center; gap: 12px;
   height: 48px; padding: 0 12px;
   border: 1px solid #d7dae3; border-radius: 12px; background: var(--white);
