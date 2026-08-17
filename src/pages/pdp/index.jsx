@@ -137,7 +137,7 @@ function PDP() {
       <div className="pdp-scroll" ref={scrollRef}>
         <Gallery imgScale={imgScale} imgOpacity={imgOpacity} productVisual={productVisual} />
         <div className="pdp-sections">
-          <MainInfo deal={deal} notified={notified} onNotify={requestDealNotification} />
+          <MainInfo deal={deal} notified={notified} onNotify={requestDealNotification} productName={productVisual.name} />
           <Delivery />
           <PaymentOffers />
           <VariantPicker />
@@ -354,7 +354,7 @@ function UnitDetails() {
   )
 }
 
-function MainInfo({ deal, notified, onNotify }) {
+function MainInfo({ deal, notified, onNotify, productName }) {
   return (
     <section className="main-info">
       <div className="store-row">
@@ -367,7 +367,7 @@ function MainInfo({ deal, notified, onNotify }) {
 
       <div className="mi-card">
       <button className="pdp-title">
-        <span>USB C Plug, 735 Charger (Nano II 65W), PPS 3-Port Fast Compact USB C Charge&hellip;</span>
+        <span>{productName}</span>
         <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden className="title-chev"><path fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6"/></svg>
       </button>
 
@@ -381,21 +381,8 @@ function MainInfo({ deal, notified, onNotify }) {
         </span>
       </div>
 
-      {/* while the deal is live its banner carries the price, so this row would
-          otherwise show it twice — the Figma toggles it off for that state */}
-      {deal.state !== 'live' && (
-        <div className="price-row">
-          <span className="price-now"><Dh />109</span>
-          <span className="price-was"><Dh />209</span>
-          <span className="price-off">47% OFF</span>
-          <span className="price-vat">(incl. of VAT)</span>
-          <InfoDot />
-        </div>
-      )}
-
-      {deal.state === 'upcoming' && <UnitDetails />}
       <LimitedTimeDeal deal={deal} dh={Dh} notified={notified} onNotify={onNotify} {...DEAL} />
-      {deal.state !== 'upcoming' && <UnitDetails />}
+      <UnitDetails />
 
       <div className="coupons">
         <span className="coupon">

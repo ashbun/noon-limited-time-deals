@@ -566,7 +566,9 @@
   font-size: 18px; font-weight: 700; line-height: 24px;
   letter-spacing: -0.18px; color: #e5641a;
 }
-.ltd--locked .ltd-save { font-size: 14px; line-height: 20px; letter-spacing: -0.1px; }
+/* The column's 6px gap is right everywhere except under the deal price, which
+   sits 4px tighter to its saving line. */
+.ltd--locked .ltd-save { font-size: 14px; line-height: 20px; letter-spacing: -0.1px; margin-top: -4px; }
 .ltd-unlock {
   align-self: flex-start;
   display: inline-flex; align-items: center; gap: 4px;

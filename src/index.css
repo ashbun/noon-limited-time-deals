@@ -82,3 +82,8 @@ input, button, textarea, select { font-family: inherit; }
     border-radius: 0; box-shadow: none;
   }
 }
+
+/* Route cross-fade wrapper — outgoing and incoming pages overlap, so both are
+   pinned to the same box rather than stacking and doubling the page height. */
+.page-fade { position: absolute; inset: 0; }
+#root { position: relative; }
