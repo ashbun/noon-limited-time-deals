@@ -753,14 +753,15 @@
   filter: blur(.3px);
   transform: translateX(0) skewX(-18deg);
   opacity: 0;
-  /* 800ms sweep, 1500ms pause — matching the ribbon's cadence. */
-  animation: deal-reveal-shimmer 2300ms linear infinite;
+  /* One sweep only — unlike the PDP ribbon, which loops. The short delay lets
+     the card finish rising before the highlight runs. */
+  animation: deal-reveal-shimmer 800ms linear 260ms 1 both;
 }
 @keyframes deal-reveal-shimmer {
   0% { transform: translateX(0) skewX(-18deg); opacity: 0; }
-  5.5652% { opacity: .32; }
-  29.2174% { opacity: .32; }
-  34.7826%, 100% { transform: translateX(300px) skewX(-18deg); opacity: 0; }
+  16% { opacity: .32; }
+  84% { opacity: .32; }
+  100% { transform: translateX(300px) skewX(-18deg); opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   .deal-reveal-shimmer::after { animation: none; }

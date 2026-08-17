@@ -124,6 +124,29 @@ function useViewportPresence() {
 
 const INITIAL_DEAL_PRICE = '349.99'
 
+// Reel timing, named so the reveal can work out when the last column lands
+// instead of guessing at a duration that would drift if these changed.
+const REEL_DELAY = 600
+const REEL_STAGGER = 45
+const REEL_DURATION = 500
+const REEL_STEP = 75
+
+/* Walks the same columns AnimatedDealPrice renders and returns when the slowest
+   one finishes, measured from the moment the reel mounts. */
+export function reelDuration(price) {
+  let reelIndex = -1
+  let last = 0
+  ;[...String(price)].forEach((end, index) => {
+    if (!/\d/.test(end)) return
+    const start = INITIAL_DEAL_PRICE[index] ?? end
+    if (index === 0 && start === end) return
+    reelIndex += 1
+    const transitions = buildDigitReel(start, end).length - 1
+    last = Math.max(last, REEL_DELAY + reelIndex * REEL_STAGGER + REEL_DURATION + transitions * REEL_STEP)
+  })
+  return last
+}
+
 function buildDigitReel(start, end) {
   const startDigit = Number(start)
   const endDigit = Number(end)
@@ -166,8 +189,8 @@ function AnimatedDealPrice({ price, dh: Dh, rowHeight = 28 }) {
           const digits = buildDigitReel(start, end)
           const transitions = digits.length - 1
           const style = {
-            '--slot-delay': `${600 + reelIndex * 45}ms`,
-            '--slot-duration': `${500 + transitions * 75}ms`,
+            '--slot-delay': `${REEL_DELAY + reelIndex * REEL_STAGGER}ms`,
+            '--slot-duration': `${REEL_DURATION + transitions * REEL_STEP}ms`,
             '--slot-distance': `${transitions * -rowHeight}px`,
           }
 
@@ -265,16 +288,15 @@ export default function LimitedTimeDeal({ deal, price, regular, upcomingWas, liv
    card would be a nuisance rather than a reveal. */
 
 const REVEAL_DELAY = 400
-// Long enough for the reel to land (its slowest column finishes ~2.0s in) plus
-// a beat to actually read the number before it clears.
-const REVEAL_VISIBLE = 2600
+// How long the settled price stays up after the reel finishes.
+const REVEAL_LINGER = 400
 
 // Module scope, deliberately not sessionStorage: this resets on every page load
 // so a refresh replays the reveal, while still holding across SPA navigation so
 // hopping between cards within one load doesn't repeat it.
 let revealShownThisLoad = false
 
-export function useDealReveal(active) {
+export function useDealReveal(active, price) {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -287,7 +309,8 @@ export function useDealReveal(active) {
       revealShownThisLoad = true
       setVisible(true)
     }, REVEAL_DELAY)
-    const hide = setTimeout(() => setVisible(false), REVEAL_DELAY + REVEAL_VISIBLE)
+    const visibleFor = reelDuration(price) + REVEAL_LINGER
+    const hide = setTimeout(() => setVisible(false), REVEAL_DELAY + visibleFor)
     return () => {
       clearTimeout(show)
       clearTimeout(hide)

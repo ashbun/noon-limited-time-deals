@@ -69,7 +69,7 @@ function PDP() {
   const [searchParams] = useSearchParams()
   const deal = useLimitedTimeDeal()
   const productVisual = getProductVisual(searchParams.get('product'))
-  const showReveal = useDealReveal(deal.state === 'live')
+  const showReveal = useDealReveal(deal.state === 'live', DEAL.price)
   const [showBottomDeal, setShowBottomDeal] = useState(false)
   const [notified, setNotified] = useState(false)
   const [showNotifyToast, setShowNotifyToast] = useState(false)
