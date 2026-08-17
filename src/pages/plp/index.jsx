@@ -34,9 +34,9 @@ const PRODUCTS = [
     reviews: '(128)',
     tag: 'Best Seller',
     ad: true,
-    dealPrice: 849,
+    dealPrice: 301,
     save: 49,
-    beforeDeal: 899,
+    beforeDeal: 350,
   },
   {
     id: 'airpods-locked',
