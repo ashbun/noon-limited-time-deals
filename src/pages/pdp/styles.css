@@ -558,8 +558,10 @@
 }
 .ltd--locked .ltd-vat { font-size: 13px; line-height: 20px; letter-spacing: -0.1px; }
 
+/* The deal side takes 53% of the widget, leaving 47% for today's price — the
+   regular column keeps flex: 1 so it absorbs whatever is left. */
 .ltd-col--deal {
-  position: relative; gap: 6px; padding: 12px 12px 10px;
+  position: relative; flex: 0 0 53%; gap: 6px; padding: 12px 12px 10px;
   background: linear-gradient(180deg, #fff7ed 0%, #fffbf6 100%);
 }
 .ltd-deal-price {
@@ -588,6 +590,25 @@
   border: 0; border-radius: 9999px; background: var(--white); cursor: pointer;
 }
 .ltd-bell--notified { opacity: .55; cursor: default; }
+
+/* The bell rings twice, with a pause in between, to point at the reminder while
+   the deal is still locked. Both swings live in one animation: the movement
+   occupies the first quarter of each cycle and the remaining three quarters are
+   held still, so iterating twice gives two rings separated by a wait — no second
+   animation and no timer. Gated on .ltd--in-view like the reel and the shimmer,
+   so it doesn't play out of sight, and it stops once you've been notified.
+   Rotating from the top edge makes it swing from its mount rather than spin. */
+.ltd--in-view .ltd-bell:not(.ltd-bell--notified) .ltd-ico {
+  transform-origin: top center;
+  animation: ltd-bell-wiggle 2.2s ease-in-out 600ms 2 both;
+}
+@keyframes ltd-bell-wiggle {
+  0%, 24%, 100% { transform: rotate(0deg); }
+  4% { transform: rotate(-14deg); }
+  9% { transform: rotate(11deg); }
+  14% { transform: rotate(-8deg); }
+  19% { transform: rotate(4deg); }
+}
 
 /* Reel geometry (28px rows) is deliberately untouched — only the colour moves
    to orange, so the slot animation keeps working exactly as before. */
@@ -666,6 +687,7 @@
 @media (prefers-reduced-motion: reduce) {
   .ltd--in-view .ltd-shimmer::after { animation: none; }
   .ltd--in-view .ltd-price-digit-track { animation: none; transform: translateY(var(--slot-distance)); }
+  .ltd--in-view .ltd-bell .ltd-ico { animation: none; }
 }
 
 /* Floating state switcher — a design-review affordance, deliberately styled
