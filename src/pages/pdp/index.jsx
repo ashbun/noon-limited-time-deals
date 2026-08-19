@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
-import { getProductVisual } from '../../data/productVisuals'
+import { DEFAULT_PDP_VISUAL, getProductVisual } from '../../data/productVisuals'
 import LimitedTimeDeal, { DealRevealModal, DealSwitcher, formatCountdown, useDealReveal, useLimitedTimeDeal } from './LimitedTimeDeal'
 import AppBottomNav from '../../components/AppBottomNav'
 import './styles.css'
@@ -68,8 +68,12 @@ function PDP() {
   const scrollRef = useRef(null)
   const [searchParams] = useSearchParams()
   const deal = useLimitedTimeDeal()
+  // Both the artwork and the prices come from the ?product= key, so whatever
+  // tile you tapped — a listing card, a CMS deal tile, the homepage deal band —
+  // opens the page for that product rather than a fixed one.
   const productVisual = getProductVisual(searchParams.get('product'))
-  const reveal = useDealReveal(deal.state === 'live', DEAL.price)
+  const productDeal = productVisual.deal ?? DEFAULT_PDP_VISUAL.deal
+  const reveal = useDealReveal(deal.state === 'live', productDeal.price)
   const [showBottomDeal, setShowBottomDeal] = useState(false)
   const [notified, setNotified] = useState(false)
   const [showNotifyToast, setShowNotifyToast] = useState(false)
@@ -133,7 +137,7 @@ function PDP() {
         {showNotifyToast && <NotifyToast onDismiss={dismissNotifyToast} />}
       </AnimatePresence>
       <AnimatePresence>
-        {reveal.visible && <DealRevealModal price={DEAL.price} remaining={deal.remaining} dh={Dh} />}
+        {reveal.visible && <DealRevealModal price={productDeal.price} remaining={deal.remaining} dh={Dh} />}
       </AnimatePresence>
       <StatusBar />
       <div className="pdp-scroll" ref={scrollRef}>
@@ -141,6 +145,7 @@ function PDP() {
         <div className="pdp-sections">
           <MainInfo
             deal={deal}
+            prices={productDeal}
             notified={notified}
             onNotify={requestDealNotification}
             productName={productVisual.name}
@@ -195,6 +200,18 @@ function BottomDeal({ deal, notified, onNotify }) {
               : <>Deal unlocks in <b>{formatCountdown(deal.remaining)}</b></>}
           </span>
         </span>
+        {/* Sits above the label so the sheen crosses the timer text, not just the
+            ribbon behind it. The mask comes in as a variable because the ribbon
+            artwork differs per state. */}
+        <span
+          className="bottom-deal-shimmer"
+          aria-hidden="true"
+          style={{
+            '--ribbon': `url(${live
+              ? '/pdp/icons/o-sticky-ribbon-active.svg'
+              : '/pdp/icons/o-sticky-ribbon-locked.svg'})`,
+          }}
+        />
       </div>
 
       <div className="bottom-deal-right">
@@ -348,9 +365,9 @@ function InfoDot() {
   return <svg width="15" height="15" viewBox="0 0 24 24" className="i-info" aria-hidden><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.7"/><path fill="currentColor" d="M11 10h2v7h-2zm0-4h2v2h-2z"/></svg>
 }
 
-// The two reference states use different comparison prices while sharing the
-// same deal price and discount.
-const DEAL = { price: '300.75', regular: '349.75', upcomingWas: 899, liveWas: 349, off: 47, save: 49 }
+// Prices used to live here as a module constant, which is why every product
+// opened at Ð300.75 regardless of what its tile advertised. They now travel with
+// the product in data/productVisuals.js.
 
 function UnitDetails() {
   return (
@@ -362,7 +379,7 @@ function UnitDetails() {
   )
 }
 
-function MainInfo({ deal, notified, onNotify, productName, animateDealPrice = true }) {
+function MainInfo({ deal, prices, notified, onNotify, productName, animateDealPrice = true }) {
   return (
     <section className="main-info">
       <div className="store-row">
@@ -389,7 +406,7 @@ function MainInfo({ deal, notified, onNotify, productName, animateDealPrice = tr
         </span>
       </div>
 
-      <LimitedTimeDeal deal={deal} dh={Dh} notified={notified} onNotify={onNotify} animatePrice={animateDealPrice} {...DEAL} />
+      <LimitedTimeDeal deal={deal} dh={Dh} notified={notified} onNotify={onNotify} animatePrice={animateDealPrice} {...prices} />
       <UnitDetails />
 
       <div className="coupons">

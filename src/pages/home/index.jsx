@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import AppBottomNav from '../../components/AppBottomNav'
+import { getProductDeal } from '../../data/productVisuals'
+import { countdownParts, formatCountdown, useLimitedTimeDeal } from '../pdp/LimitedTimeDeal'
 import './styles.css'
 
 // noon homepage — ported from the marketplace-switcher experiment in
@@ -107,9 +109,11 @@ export default function HomePage() {
   }
 
   const openListing = () => navigate('/plp')
-  // The deal widget's cards go straight to the product, in its live-deal state —
-  // that's the whole point of the widget.
-  const openProduct = () => navigate('/pdp?deal=live&product=shoerack')
+  // Every product tile passes its own catalogue key and the deal state its strip
+  // was advertising, so the page you land on shows the same artwork, title and
+  // prices you just tapped.
+  const openProduct = (productKey, state = 'live') =>
+    navigate(`/pdp?${new URLSearchParams({ deal: state, product: productKey })}`)
 
   return (
     <div className="stage">
@@ -281,7 +285,7 @@ function MarketplaceSwitcher({ collapsed }) {
 /* ---------------------------- Best picks for you --------------------------- */
 const BEST_PICKS = [
   {
-    id: 'airpods-pro-2',
+    id: 'airpods-pro-2', productKey: 'pick-airpods',
     title: 'Apple Airpods Pro 2 Wireless Earbuds',
     image: '/home/picks/airpods.png',
     imageSize: 122,
@@ -295,7 +299,7 @@ const BEST_PICKS = [
     badgeAlt: 'express Today',
   },
   {
-    id: 'whirlpool-magic-clean',
+    id: 'whirlpool-magic-clean', productKey: 'pick-washer',
     title: 'Whirlpool 7 kg Magic Clean',
     image: '/home/picks/washer.png',
     imageSize: 142,
@@ -309,7 +313,7 @@ const BEST_PICKS = [
     badgeAlt: 'express',
   },
   {
-    id: 'maynos-phone-mount',
+    id: 'maynos-phone-mount', productKey: 'pick-mount',
     title: 'MAYNOS Suction Phone Case Mount',
     image: '/home/picks/phone-mount.png',
     imageSize: 122,
@@ -375,7 +379,7 @@ function BestPicks({ title, onOpenProduct }) {
       <div className="home-rail">
         <div className="home-rail-row">
           {BEST_PICKS.map((product) => (
-            <CompactCard key={product.id} product={product} onClick={onOpenProduct} />
+            <CompactCard key={product.id} product={product} onClick={() => onOpenProduct(product.productKey)} />
           ))}
         </div>
       </div>
@@ -390,50 +394,55 @@ function BestPicks({ title, onOpenProduct }) {
    plain discount. Cards open the PDP; the band itself opens the listing. */
 const HP_DEALS = [
   {
-    id: 'airpods-live',
+    id: 'airpods-live', productKey: 'hpd-airpods-live', state: 'live',
     image: '/home/hpdeal/airpods.png',
     title: 'Apple Airpods Pro 2 Wireless Earbuds',
     bestSeller: true,
     price: '849', save: '50',
     was: '899', wasLabel: 'Before deal',
-    footer: { kind: 'live', label: 'Deal ends in', time: '02: 40: 32' },
+    footer: { kind: 'live', label: 'Deal ends in' },
   },
   {
-    id: 'sneaker-upcoming',
+    id: 'sneaker-upcoming', productKey: 'hpd-sneaker', state: 'upcoming',
     image: '/home/hpdeal/sneaker.png',
     title: 'Apple Airpods Pro 2 Wireless Earbuds',
     price: '899', priceDark: true, listed: '1699', off: '33%',
     dealPrice: '849',
-    footer: { kind: 'locked', label: 'Deal starts in', time: '01: 40: 32' },
+    footer: { kind: 'locked', label: 'Deal starts in' },
   },
   {
-    id: 'airpods-live-2',
+    id: 'airpods-live-2', productKey: 'hpd-airpods-live', state: 'live',
     image: '/home/hpdeal/airpods.png',
     title: 'Apple Airpods Pro 2 Wireless Earbuds',
     bestSeller: true,
     price: '849', save: '50',
     was: '899', wasLabel: 'Before deal',
-    footer: { kind: 'live', label: 'Deal ends in', time: '02: 40: 32' },
+    footer: { kind: 'live', label: 'Deal ends in' },
   },
   {
-    id: 'airpods-off',
+    id: 'airpods-off', productKey: 'hpd-airpods-off', state: 'live',
     image: '/home/hpdeal/airpods.png',
     title: 'Apple Airpods Pro 2 Wireless Earbuds',
     price: '849', off: '60% OFF',
     secondary: '899', listed: '1699',
-    footer: { kind: 'live', label: 'Ends in', time: '02: 40: 32' },
+    footer: { kind: 'live', label: 'Ends in' },
   },
   {
-    id: 'sneaker-off',
+    id: 'sneaker-off', productKey: 'hpd-nike', state: 'live',
     image: '/home/hpdeal/sneaker.png',
     title: 'Nike sneakers white shoes with comfortable soles',
     price: '849', off: '60% OFF',
     secondary: '899', listed: '1699',
-    footer: { kind: 'live', label: 'Ends in', time: '02: 40: 32' },
+    footer: { kind: 'live', label: 'Ends in' },
   },
 ]
 
 function HpDealCard({ deal, onClick }) {
+  // A locked card counts down to the deal opening, a live one to it closing — so
+  // each asks the clock for its own state rather than reading the URL, which is
+  // one value for the whole page.
+  const clock = useLimitedTimeDeal(deal.footer.kind === 'locked' ? 'upcoming' : 'live')
+
   return (
     <article className="home-hpd-card" onClick={onClick}>
       <div className="home-hpd-media">
@@ -473,7 +482,7 @@ function HpDealCard({ deal, onClick }) {
         {deal.footer.kind === 'locked'
           ? <img className="home-hpd-foot-ico" src="/home/hpdeal/lock.svg" alt="" aria-hidden="true" />
           : <img className="home-hpd-foot-ico" src="/home/hpdeal/timelapse.svg" alt="" aria-hidden="true" />}
-        {deal.footer.label} <b>{deal.footer.time}</b>
+        {deal.footer.label} <b>{formatCountdown(clock.remaining)}</b>
       </div>
     </article>
   )
@@ -498,7 +507,7 @@ function LimitedTimeDealBand({ onOpenProduct, onOpenListing }) {
       <div className="home-hpd-rail">
         <div className="home-hpd-rail-row">
           {HP_DEALS.map((deal) => (
-            <HpDealCard key={deal.id} deal={deal} onClick={(e) => { e.stopPropagation(); onOpenProduct() }} />
+            <HpDealCard key={deal.id} deal={deal} onClick={(e) => { e.stopPropagation(); onOpenProduct(deal.productKey, deal.state) }} />
           ))}
         </div>
       </div>
@@ -746,13 +755,20 @@ function PromoTile({ product, badgeColor, fit = 'cover', showDetails, onClick })
    discounted products. Tapping a product opens its PDP; tapping anywhere else
    on the widget opens the listing. */
 const DEAL_WIDGET_PRODUCTS = [
-  { id: 'shoe-1', image: '/home/deal/shoe-1.png' },
-  { id: 'shoe-2', image: '/home/deal/shoe-2.png' },
-  { id: 'shoe-3', image: '/home/deal/shoe-3.png' },
-  { id: 'shoe-4', image: '/home/deal/shoe-2.png' },
+  { id: 'shoe-1', productKey: 'deal-shoe-1', image: '/home/deal/shoe-1.png' },
+  { id: 'shoe-2', productKey: 'deal-shoe-2', image: '/home/deal/shoe-2.png' },
+  { id: 'shoe-3', productKey: 'deal-shoe-3', image: '/home/deal/shoe-3.png' },
+  { id: 'shoe-4', productKey: 'deal-shoe-2', image: '/home/deal/shoe-2.png' },
 ]
 
 function DealWidget({ onOpenProduct, onOpenListing }) {
+  // Same hook the PDP and the listing use, so the format and the scenario match.
+  // Note it anchors per mount by design, so each surface counts down from the top
+  // of the deal rather than from a shared start — this widget and the PDP it opens
+  // will read a few seconds apart.
+  const deal = useLimitedTimeDeal()
+  const [hours, minutes, seconds] = countdownParts(deal.remaining)
+
   return (
     <article className="home-deal" onClick={onOpenListing}>
       <div className="home-deal-head">
@@ -761,7 +777,7 @@ function DealWidget({ onOpenProduct, onOpenListing }) {
           {/* The colons are lighter than the digits in the design, so they're
               their own spans rather than part of the string. */}
           <span className="home-deal-countdown">
-            Deal ends in 02<i>:</i>40<i>:</i>32
+            Deal ends in {hours}<i>:</i>{minutes}<i>:</i>{seconds}
           </span>
         </span>
         <span className="home-deal-more" aria-hidden="true">
@@ -770,24 +786,30 @@ function DealWidget({ onOpenProduct, onOpenListing }) {
       </div>
 
       <div className="home-deal-grid">
-        {DEAL_WIDGET_PRODUCTS.map((product) => (
-          <button
-            className="home-deal-card"
-            type="button"
-            key={product.id}
-            aria-label="Limited Deal — Ð129, was Ð299"
-            onClick={(event) => { event.stopPropagation(); onOpenProduct() }}
-          >
-            <span className="home-deal-media">
-              <img src={product.image} alt="" aria-hidden="true" />
-              <span className="home-deal-notch">Limited Deal</span>
-            </span>
-            <span className="home-deal-price">
-              <b><Dh />129</b>
-              <s>299</s>
-            </span>
-          </button>
-        ))}
+        {DEAL_WIDGET_PRODUCTS.map((product) => {
+          // Prices come from the catalogue, so this tile and the PDP it opens
+          // can't disagree about what the deal is.
+          const { price, liveWas } = getProductDeal(product.productKey)
+
+          return (
+            <button
+              className="home-deal-card"
+              type="button"
+              key={product.id}
+              aria-label={`Limited Deal — ${DH}${price}, was ${DH}${liveWas}`}
+              onClick={(event) => { event.stopPropagation(); onOpenProduct(product.productKey) }}
+            >
+              <span className="home-deal-media">
+                <img src={product.image} alt="" aria-hidden="true" />
+                <span className="home-deal-notch">Limited Deal</span>
+              </span>
+              <span className="home-deal-price">
+                <b><Dh />{price}</b>
+                <s>{liveWas}</s>
+              </span>
+            </button>
+          )
+        })}
       </div>
     </article>
   )

@@ -114,6 +114,33 @@
 }
 .bottom-deal-left { position: relative; flex: 0 0 243px; width: 243px; height: 32px; }
 .bottom-deal--live .bottom-deal-left { flex-basis: 188px; width: 188px; }
+
+/* Sheen across the sticky bar's left half, masked to whichever ribbon that state
+   uses so it only lights the orange. One sweep as the bar appears rather than a
+   loop — the bar stays on screen the whole time you're past the widget, and a
+   repeating glint there would be a distraction rather than a cue. */
+.bottom-deal-shimmer {
+  position: absolute; inset: 0; z-index: 2;
+  overflow: hidden; pointer-events: none;
+  --sweep: 300px;
+  -webkit-mask: var(--ribbon) center / 100% 100% no-repeat;
+  mask: var(--ribbon) center / 100% 100% no-repeat;
+}
+.bottom-deal--live .bottom-deal-shimmer { --sweep: 245px; }
+.bottom-deal-shimmer::after {
+  content: '';
+  position: absolute; top: -12px; bottom: -12px; left: -46px;
+  width: 34px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .8), transparent);
+  filter: blur(.3px);
+  animation: bottom-deal-sheen 900ms linear 220ms 1 both;
+}
+@keyframes bottom-deal-sheen {
+  0% { transform: translateX(0) skewX(-18deg); opacity: 0; }
+  15% { opacity: .34; }
+  85% { opacity: .34; }
+  100% { transform: translateX(var(--sweep)) skewX(-18deg); opacity: 0; }
+}
 .bottom-deal-ribbon { position: absolute; inset: 0; width: 100%; height: 100%; }
 .bottom-deal-left-content {
   position: relative; z-index: 1;
@@ -538,9 +565,18 @@
 }
 .ltd-before s { font-weight: 600; }
 
-/* Locked drops the ribbon for a two-column split: today's price beside the
-   deal being held back. No ribbon here, so no shimmer. */
-.ltd--locked { display: flex; align-items: stretch; }
+/* Locked drops the ribbon for a two-column split: today's price beside the deal
+   being held back.
+   The locked state runs a short sequence when it comes into view: a sheen across
+   the deal price, then the bell rings. Both delays derive from these two values,
+   so the second beat can't drift away from the first. */
+.ltd--locked {
+  display: flex; align-items: stretch;
+  --ltd-sheen-delay: 450ms;
+  /* 1440ms = 900 + 60%. The bell's delay is a calc() off this, so slowing the
+     sheen pushes the ring back with it rather than overlapping. */
+  --ltd-sheen-dur: 1440ms;
+}
 .ltd-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
 .ltd-col--regular { gap: 4px; padding: 12px 12px 8px; }
 .ltd-reg-price {
@@ -567,6 +603,27 @@
 .ltd-deal-price {
   font-size: 18px; font-weight: 700; line-height: 24px;
   letter-spacing: -0.18px; color: #e5641a;
+}
+/* One-shot sheen over the deal price. There is no artwork behind the number to
+   mask against the way the ribbons do, so the highlight is clipped to the glyphs
+   instead: a gradient that is the text's own colour either side of a lighter
+   band, slid across. At rest — before the delay and after it finishes — the
+   visible slice is all currentColor, so the price reads normally. */
+.ltd--locked.ltd--in-view .ltd-deal-price {
+  background-image: linear-gradient(100deg, currentColor 42%, #ffa76d 50%, currentColor 58%);
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: ltd-price-sheen var(--ltd-sheen-dur) ease-in-out var(--ltd-sheen-delay) 1 both;
+}
+/* The dirham is a child span with no background of its own — it would inherit the
+   transparent fill and disappear, so it stays solid while the digits shimmer. */
+.ltd--locked.ltd--in-view .ltd-deal-price .dh { -webkit-text-fill-color: #e5641a; }
+@keyframes ltd-price-sheen {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
 }
 /* The column's 6px gap is right everywhere except under the deal price, which
    pulls all the way up to its saving line — the two read as one price block. */
@@ -597,10 +654,13 @@
    held still, so iterating twice gives two rings separated by a wait — no second
    animation and no timer. Gated on .ltd--in-view like the reel and the shimmer,
    so it doesn't play out of sight, and it stops once you've been notified.
-   Rotating from the top edge makes it swing from its mount rather than spin. */
+   Rotating from the top edge makes it swing from its mount rather than spin.
+   The delay picks up where the price sheen ends, so the eye is led from the
+   price to the reminder rather than being pulled both ways at once. */
 .ltd--in-view .ltd-bell:not(.ltd-bell--notified) .ltd-ico {
   transform-origin: top center;
-  animation: ltd-bell-wiggle 2.2s ease-in-out 600ms 2 both;
+  animation: ltd-bell-wiggle 2.2s ease-in-out
+    calc(var(--ltd-sheen-delay, 450ms) + var(--ltd-sheen-dur, 900ms) + 150ms) 2 both;
 }
 @keyframes ltd-bell-wiggle {
   0%, 24%, 100% { transform: rotate(0deg); }
@@ -688,6 +748,11 @@
   .ltd--in-view .ltd-shimmer::after { animation: none; }
   .ltd--in-view .ltd-price-digit-track { animation: none; transform: translateY(var(--slot-distance)); }
   .ltd--in-view .ltd-bell .ltd-ico { animation: none; }
+  .bottom-deal-shimmer::after { animation: none; }
+  /* Without the sweep the clipped fill has nothing to paint, so put the ink back. */
+  .ltd--locked.ltd--in-view .ltd-deal-price {
+    animation: none; background-image: none; -webkit-text-fill-color: #e5641a;
+  }
 }
 
 /* Floating state switcher — a design-review affordance, deliberately styled
@@ -729,9 +794,10 @@
   background: linear-gradient(180deg, #fff5e9 0%, #ffffff 56.96%);
 }
 
-/* The tab straddles the card's top edge, with a small notch either side. */
+/* The tab straddles the card's top edge, with a small notch either side. Sitting
+   1px higher than the Figma's -4px, so it reads as more clearly overlapping. */
 .deal-reveal-tab {
-  position: absolute; left: 28px; top: -4px;
+  position: absolute; left: 28px; top: -5px;
   display: block; height: 36px;
 }
 .deal-reveal-tab-art {

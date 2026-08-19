@@ -48,8 +48,12 @@ function useScenario() {
   return [scenario, setScenario]
 }
 
-export function useLimitedTimeDeal() {
-  const [scenario] = useScenario()
+/* scenarioOverride lets a caller ask for a specific state regardless of the URL —
+   the homepage's deal band shows a running deal and an unopened one side by side,
+   so the two cards can't both take their state from `?deal=`. */
+export function useLimitedTimeDeal(scenarioOverride) {
+  const [urlScenario] = useScenario()
+  const scenario = scenarioOverride ?? urlScenario
   const now = useNow()
 
   // The offsets above are relative to an anchor, so the countdown actually runs
@@ -92,12 +96,18 @@ export function DealSwitcher() {
   )
 }
 
-/* "01: 20: 24" — the spaced format the design uses. Hours are uncapped so a
-   multi-day deal reads 52: 30: 00 rather than silently wrapping. */
-export function formatCountdown(ms) {
+/* [hh, mm, ss], for callers that style the separators themselves — the homepage's
+   deal widget sets its colons in a lighter weight than the digits. Hours are
+   uncapped so a multi-day deal reads 52 rather than silently wrapping. */
+export function countdownParts(ms) {
   const total = Math.floor(ms / SECOND)
   const pad = (n) => String(n).padStart(2, '0')
-  return `${pad(Math.floor(total / 3600))}: ${pad(Math.floor(total / 60) % 60)}: ${pad(total % 60)}`
+  return [pad(Math.floor(total / 3600)), pad(Math.floor(total / 60) % 60), pad(total % 60)]
+}
+
+/* "01: 20: 24" — the spaced format the PDP and listing use. */
+export function formatCountdown(ms) {
+  return countdownParts(ms).join(': ')
 }
 
 function useViewportPresence() {

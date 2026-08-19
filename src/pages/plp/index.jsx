@@ -22,37 +22,42 @@ function Dh() {
   return <span className="dh" aria-label="AED">{DH}</span>
 }
 
+// Card figures come from the catalogue's `deal`, not from copies here, so a card
+// and the PDP it opens can't disagree about the price.
+const SHOERACK = PRODUCT_VISUALS.shoerack
+const AIRPODS = PRODUCT_VISUALS.airpods
+
 const PRODUCTS = [
   {
     id: 'shoerack-live',
     productKey: 'shoerack',
     deal: 'activated',
-    img: PRODUCT_VISUALS.shoerack.image,
-    fit: PRODUCT_VISUALS.shoerack.fit,
-    title: PRODUCT_VISUALS.shoerack.name,
+    img: SHOERACK.image,
+    fit: SHOERACK.fit,
+    title: SHOERACK.name,
     rating: '4.3',
     reviews: '(128)',
     tag: 'Best Seller',
     ad: true,
-    dealPrice: 301,
-    save: 49,
-    beforeDeal: 350,
+    dealPrice: SHOERACK.deal.price,
+    save: SHOERACK.deal.save,
+    beforeDeal: SHOERACK.deal.liveWas,
   },
   {
     id: 'airpods-locked',
     productKey: 'airpods',
     deal: 'locked',
-    img: PRODUCT_VISUALS.airpods.image,
-    fit: PRODUCT_VISUALS.airpods.fit,
-    title: PRODUCT_VISUALS.airpods.name,
+    img: AIRPODS.image,
+    fit: AIRPODS.fit,
+    title: AIRPODS.name,
     rating: '4.3',
     reviews: '(128)',
     tag: 'Best Seller',
     ad: true,
-    price: 899,
-    was: 1399,
-    off: '40%',
-    dealPrice: 849,
+    price: AIRPODS.deal.regular,
+    was: AIRPODS.deal.upcomingWas,
+    off: `${AIRPODS.deal.off}%`,
+    dealPrice: AIRPODS.deal.price,
   },
 ]
 
@@ -120,15 +125,12 @@ export default function PlpPage() {
   )
 }
 
-// Pops history when we arrived from the homepage rather than pushing another
-// entry, so the browser's own back button stays coherent. On a deep link there
-// is nothing to pop, so land on the homepage instead. Same rule as the PDP's.
+// Always the homepage, never history. Popping the stack meant the chevron's
+// destination depended on how you got here — arriving from a product sent you
+// back to that product rather than up to the homepage.
 function useBackToHome() {
   const navigate = useNavigate()
-  return () => {
-    if (window.history.state?.idx > 0) navigate(-1)
-    else navigate('/home')
-  }
+  return () => navigate('/home')
 }
 
 function PlpHeader({ onBack }) {
