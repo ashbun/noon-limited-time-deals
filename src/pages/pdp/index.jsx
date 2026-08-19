@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
 import { DEFAULT_PDP_VISUAL, getProductVisual } from '../../data/productVisuals'
 import LimitedTimeDeal, { DealRevealModal, DealSwitcher, formatCountdown, useDealReveal, useLimitedTimeDeal } from './LimitedTimeDeal'
+import { FlashSaleFloating, FlashSaleInline, FlashSalePriceRow } from './FlashSale'
+import { useIsFlashSale } from '../../variant'
 import AppBottomNav from '../../components/AppBottomNav'
 import './styles.css'
 
@@ -26,14 +28,6 @@ export default function PdpPage() {
         <PDP />
       </div>
     </div>
-  )
-}
-
-function TouchPoints() {
-  return (
-    <button className="touch-points" type="button" aria-label="Touch points">
-      <img src="/pdp/icons/touch-points.svg" alt="" width="24" height="27" />
-    </button>
   )
 }
 
@@ -73,7 +67,10 @@ function PDP() {
   // opens the page for that product rather than a fixed one.
   const productVisual = getProductVisual(searchParams.get('product'))
   const productDeal = productVisual.deal ?? DEFAULT_PDP_VISUAL.deal
-  const reveal = useDealReveal(deal.state === 'live', productDeal.price)
+  // Iteration 2 replaces the deal widget outright, and its live state has no
+  // reveal modal — the price is simply already the deal price.
+  const flashSale = useIsFlashSale()
+  const reveal = useDealReveal(!flashSale && deal.state === 'live', productDeal.price)
   const [showBottomDeal, setShowBottomDeal] = useState(false)
   const [notified, setNotified] = useState(false)
   const [showNotifyToast, setShowNotifyToast] = useState(false)
@@ -146,6 +143,7 @@ function PDP() {
           <MainInfo
             deal={deal}
             prices={productDeal}
+            flashSale={flashSale}
             notified={notified}
             onNotify={requestDealNotification}
             productName={productVisual.name}
@@ -163,6 +161,8 @@ function PDP() {
       </div>
       <BottomNav
         deal={deal}
+        prices={productDeal}
+        flashSale={flashSale}
         showDeal={showBottomDeal}
         notified={notified}
         onNotify={requestDealNotification}
@@ -241,14 +241,23 @@ function BottomDeal({ deal, notified, onNotify }) {
   )
 }
 
-function BottomNav({ deal, showDeal, notified, onNotify }) {
+function BottomNav({ deal, prices, flashSale, showDeal, notified, onNotify }) {
   const reduceMotion = useReducedMotion()
 
   return (
     <div className="pdp-bottomnav">
-      <TouchPoints />
+      {flashSale && deal.state === 'upcoming' && (
+        <FlashSaleFloating
+          dh={Dh}
+          price={prices.price}
+          off={prices.off}
+          remaining={deal.remaining}
+          notified={notified}
+          onNotify={onNotify}
+        />
+      )}
       <AnimatePresence initial={false}>
-        {showDeal && deal.state !== 'ended' && (
+        {!flashSale && showDeal && deal.state !== 'ended' && (
           <motion.div
             className="bottom-deal-reveal"
             initial={reduceMotion ? false : { height: 0 }}
@@ -379,7 +388,7 @@ function UnitDetails() {
   )
 }
 
-function MainInfo({ deal, prices, notified, onNotify, productName, animateDealPrice = true }) {
+function MainInfo({ deal, prices, flashSale, notified, onNotify, productName, animateDealPrice = true }) {
   return (
     <section className="main-info">
       <div className="store-row">
@@ -406,7 +415,13 @@ function MainInfo({ deal, prices, notified, onNotify, productName, animateDealPr
         </span>
       </div>
 
-      <LimitedTimeDeal deal={deal} dh={Dh} notified={notified} onNotify={onNotify} animatePrice={animateDealPrice} {...prices} />
+      {flashSale
+        // Live puts the flash-sale block here; locked moves the deal out to the
+        // floating pill and leaves a plain price row behind.
+        ? (deal.state === 'live'
+          ? <FlashSaleInline dh={Dh} price={prices.price} was={prices.liveWas} off={prices.off} remaining={deal.remaining} />
+          : <FlashSalePriceRow dh={Dh} regular={prices.regular} off={prices.off} />)
+        : <LimitedTimeDeal deal={deal} dh={Dh} notified={notified} onNotify={onNotify} animatePrice={animateDealPrice} {...prices} />}
       <UnitDetails />
 
       <div className="coupons">

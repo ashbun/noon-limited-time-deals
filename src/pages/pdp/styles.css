@@ -209,17 +209,6 @@
 .add-cart:hover { filter: brightness(1.05); }
 
 /* Figma "Touch points" 22629:111193. Floats independently of the PDP nav. */
-.touch-points {
-  position: absolute; right: 12px; bottom: calc(100% + 12px); z-index: 20;
-  width: 52px; height: 54px; padding: 12px;
-  display: grid; place-items: center;
-  border: 2px solid #fff; border-radius: 36px;
-  background: linear-gradient(180deg, #e96cc4 0%, #b06dff 100%);
-  box-shadow: 0 -4px 18.45px #fad6ff;
-  cursor: pointer;
-}
-.touch-points img { display: block; width: 24px; height: 26.108px; }
-
 /* Card base */
 .card { background: var(--white); border-radius: 16px; padding: 12px; }
 
@@ -749,6 +738,11 @@
   .ltd--in-view .ltd-price-digit-track { animation: none; transform: translateY(var(--slot-distance)); }
   .ltd--in-view .ltd-bell .ltd-ico { animation: none; }
   .bottom-deal-shimmer::after { animation: none; }
+  /* animation: none alone would leave the track showing the outgoing digit. */
+  .fs-digit-track.is-rolling { animation: none; transform: translateY(-25px); }
+  .fs-digit-track.is-rolling .fs-digit-cell { animation: none; }
+  .fs-float-bell img { animation: none; }
+  .fs-float-price { animation: none; background-image: none; -webkit-text-fill-color: var(--white); }
   /* Without the sweep the clipped fill has nothing to paint, so put the ink back. */
   .ltd--locked.ltd--in-view .ltd-deal-price {
     animation: none; background-image: none; -webkit-text-fill-color: #e5641a;
@@ -870,4 +864,192 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .deal-reveal-shimmer::after { animation: none; }
+}
+
+/* =========================== Iteration 2 — flash sale ======================== */
+/* Figma 23328:376229 (inline, live) and 23341:384237 (floating, locked). Both
+   render only when the flash-sale iteration is selected on the start screen. */
+
+/* Icon slots: each glyph exports at its own vector size and sits inset in a
+   square slot, the same convention .ltd-ico uses. */
+.fs-ico { position: relative; flex: 0 0 auto; display: block; overflow: hidden; }
+.fs-ico img { position: absolute; display: block; }
+.fs-ico--timelapse { width: 14px; height: 14px; }
+.fs-ico--timelapse img { left: 1.1667px; top: 1.1667px; width: 11.6667px; height: 11.6667px; }
+.fs-ico--lock { width: 14px; height: 14px; }
+.fs-ico--lock img { left: 1.46px; top: 1.24px; width: 11.04px; height: 11.58px; }
+
+/* ---- countdown, boxed digits (shared by both states) ---- */
+.fs-timer {
+  flex: 0 0 auto;
+  display: flex; align-items: center;
+  overflow: hidden; border-radius: 6px;
+}
+.fs-timer-label {
+  display: flex; align-items: center; gap: 4px;
+  height: 24px; padding: 4px 6px;
+  font-size: 12px; line-height: 14px; letter-spacing: -0.12px;
+  white-space: nowrap;
+}
+.fs-digits {
+  display: flex; align-items: center; gap: 1px;
+  /* One value for the roll: the travel and the outgoing box's colour shift both
+     read it, so they always finish together. */
+  --fs-roll: 720ms;
+  --fs-cell-out: #ae3a13;
+}
+/* The box is the viewport; the digits ride a track inside it, so a change can
+   roll the old value up and out while the new one rises from below. */
+.fs-digit { width: 20px; height: 24px; overflow: hidden; }
+/* The seconds box is 2px wider in the design, so the group ends flush. */
+.fs-digit:last-child { width: 22px; }
+/* The 1px gap is what you see between the two digits mid-roll. It matches the
+   gap between the boxes themselves, and shows the timer's own backing through it
+   — which is why the fill lives on the cell rather than on the box. */
+.fs-digit-track { display: flex; flex-direction: column; gap: 1px; }
+.fs-digit-cell {
+  display: flex; align-items: center; justify-content: center;
+  flex: 0 0 24px; height: 24px;
+  background: var(--fs-cell);
+  font-size: 11px; font-weight: 700; line-height: 14px; letter-spacing: -0.1px;
+  color: var(--white);
+}
+/* 25px = one 24px cell plus the 1px gap. */
+.fs-digit-track.is-rolling { animation: fs-digit-roll var(--fs-roll) cubic-bezier(.22, 1, .36, 1) both; }
+@keyframes fs-digit-roll {
+  from { transform: translateY(0); }
+  to { transform: translateY(-25px); }
+}
+/* The two faces of a drum rather than two flat cards sliding: the digit leaving
+   hinges away over the top while the one arriving swings up from underneath, each
+   shaded down as it turns edge-on.
+   The perspective sits inside each cell's own transform rather than on an
+   ancestor, because .fs-digit has to keep overflow: hidden to clip the roll — and
+   that flattens any preserve-3d chain above the cells.
+   First child is the outgoing one; the track renders it above the arrival. Both
+   share the travel's duration and curve, so the turn, the shading and the
+   movement stay in step. */
+.fs-digit-track.is-rolling .fs-digit-cell:first-child {
+  transform-origin: center bottom;
+  animation: fs-digit-exit var(--fs-roll) cubic-bezier(.22, 1, .36, 1) both;
+}
+.fs-digit-track.is-rolling .fs-digit-cell:last-child {
+  transform-origin: center top;
+  animation: fs-digit-enter var(--fs-roll) cubic-bezier(.22, 1, .36, 1) both;
+}
+/* 62deg rather than a full 90: past that the face is edge-on and its projected
+   height collapses, which opens a gap to the timer's backing behind the box. */
+@keyframes fs-digit-exit {
+  from { transform: perspective(90px) rotateX(0deg); background-color: var(--fs-cell); }
+  to { transform: perspective(90px) rotateX(62deg); background-color: var(--fs-cell-out); }
+}
+@keyframes fs-digit-enter {
+  from { transform: perspective(90px) rotateX(-62deg); background-color: var(--fs-cell-out); }
+  to { transform: perspective(90px) rotateX(0deg); background-color: var(--fs-cell); }
+}
+
+.fs-timer--live { border: 0.75px solid #fee7cd; background: var(--white); }
+.fs-timer--live .fs-timer-label { font-weight: 500; color: #1d2539; }
+/* The deeper brand deal orange rather than Figma's brighter #fc7618 — three
+   saturated boxes in a row read as loud next to the cream block. Held in a
+   variable so the roll's darkening keyframe works for either tone. */
+.fs-digits--live { --fs-cell: #e5641a; }
+
+.fs-timer--locked { background: #474747; }
+.fs-timer--locked .fs-timer-label { background: #414141; font-weight: 400; color: var(--white); }
+/* The locked ticker turns within its own greys — the live state's burnt orange
+   would read as a colour change rather than a face turning away. */
+.fs-digits--locked { --fs-cell: #808080; --fs-cell-out: #555555; }
+
+/* ---- live: inline block in the info card ---- */
+.fs-inline {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 5px 8px 5px 10px;
+  border-radius: 10px; background: #fff5e8;
+}
+.fs-inline-left { display: flex; flex-direction: column; align-items: flex-start; padding-top: 2px; }
+.fs-inline-logo { display: block; width: 101px; height: 16px; }
+.fs-inline-prices { display: flex; align-items: baseline; gap: 4px; }
+.fs-inline-price {
+  font-size: 20px; font-weight: 700; line-height: 28px; letter-spacing: -0.25px; color: var(--ink);
+}
+.fs-inline-was {
+  font-size: 13px; font-weight: 500; line-height: 20px; letter-spacing: -0.1px;
+  color: var(--ink-500); text-decoration: line-through;
+}
+.fs-inline-off {
+  font-style: normal;
+  font-size: 13px; font-weight: 600; line-height: 20px; letter-spacing: -0.1px; color: #12a168;
+}
+
+/* ---- locked: floating pill ---- */
+/* Pinned to the top edge of the bottom bar so it clears whatever height that
+   block happens to be, rather than guessing an offset from the frame bottom. */
+.fs-float {
+  position: absolute; left: 12px; right: 12px; bottom: 100%; z-index: 4;
+  /* Two beats on arrival: the deal price sheens, then the bell rings. */
+  --fs-sheen-delay: 450ms;
+  --fs-sheen-dur: 1440ms;
+  margin-bottom: 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 52px; padding: 8px 8px 8px 20px;
+  border-radius: 56px;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(3px);
+}
+.fs-float-left { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
+.fs-mark { display: flex; align-items: center; gap: 4px; height: 13px; }
+.fs-mark-flash { display: block; width: 38.52px; height: 8.158px; }
+.fs-mark-sale { display: block; width: 30.261px; height: 8.148px; }
+.fs-float-prices { display: flex; align-items: baseline; gap: 4px; white-space: nowrap; }
+.fs-float-price {
+  font-size: 18px; font-weight: 700; line-height: 24px; letter-spacing: -0.15px; color: var(--white);
+  /* One-shot sheen clipped to the glyphs, reusing iteration 1's keyframe. The band
+     dips rather than brightens: the text is already white, so a lighter highlight
+     would be invisible — a travelling dip is what reads as a sheen here. */
+  background-image: linear-gradient(100deg, currentColor 42%, rgba(255, 255, 255, .5) 50%, currentColor 58%);
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: ltd-price-sheen var(--fs-sheen-dur) ease-in-out var(--fs-sheen-delay) 1 both;
+}
+/* The dirham is a child span with no background of its own — it would inherit the
+   transparent fill and vanish. */
+.fs-float-price .dh { -webkit-text-fill-color: var(--white); }
+
+/* The bell then rings twice, starting where the sheen ends so the eye is led from
+   the price to the reminder rather than pulled both ways. Reuses iteration 1's
+   wiggle, and the delay is derived so retiming the sheen moves the ring with it. */
+.fs-float-bell:not(.is-notified) img {
+  transform-origin: top center;
+  animation: ltd-bell-wiggle 2.2s ease-in-out
+    calc(var(--fs-sheen-delay) + var(--fs-sheen-dur) + 150ms) 2 both;
+}
+.fs-float-off {
+  font-style: normal;
+  font-size: 13px; font-weight: 600; line-height: 20px; letter-spacing: -0.1px; color: #26b57c;
+}
+.fs-float-right { display: flex; align-items: center; gap: 8px; }
+.fs-float-bell {
+  flex: 0 0 36px;
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; padding: 0;
+  border: 0; border-radius: 9999px; background: var(--white); cursor: pointer;
+}
+.fs-float-bell img { display: block; width: 12.92px; height: 14.79px; }
+.fs-float-bell.is-notified { opacity: .55; cursor: default; }
+
+/* ---- locked: the plain price row the info card keeps ---- */
+.fs-plain { display: flex; align-items: baseline; gap: 8px; }
+.fs-plain-price {
+  font-size: 20px; font-weight: 700; line-height: 28px; letter-spacing: -0.25px; color: var(--ink);
+}
+
+.fs-plain-off {
+  font-size: 13px; font-weight: 600; line-height: 20px; letter-spacing: -0.1px; color: #12a168;
+}
+.fs-plain-vat {
+  font-size: 13px; font-weight: 400; line-height: 20px; letter-spacing: -0.1px; color: var(--ink-600);
 }
